@@ -512,14 +512,13 @@ body {
 .pros-cons-container {
     text-align: left;
 }
-
 .pros-list, .cons-list {
     list-style: none !important;
     padding-left: 0 !important;
-    margin-bottom: 1.5rem !important;
 }
 
 .pros-list li, .cons-list li {
+    list-style: none !important;
     position: relative;
     padding-left: 1.8rem;
     margin-bottom: 0.8rem;

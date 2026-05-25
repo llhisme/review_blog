@@ -4,11 +4,14 @@ const bcrypt = require('bcryptjs');
 const sanitizeHtml = require('sanitize-html');
 
 const sanitizeOptions = {
-        allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'iframe']),
+        allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'iframe', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'caption', 'colgroup', 'col']),
         allowedAttributes: {
                 ...sanitizeHtml.defaults.allowedAttributes,
                 '*': ['style', 'class', 'id'],
-                'iframe': ['src', 'width', 'height', 'frameborder', 'allowfullscreen']
+                'iframe': ['src', 'width', 'height', 'frameborder', 'allowfullscreen'],
+                'table': ['cellpadding', 'cellspacing', 'border'],
+                'th': ['colspan', 'rowspan'],
+                'td': ['colspan', 'rowspan']
         }
 };
 

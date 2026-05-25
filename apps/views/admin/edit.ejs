@@ -6,8 +6,8 @@
     <title><%= title %> - Admin Panel</title>
     <link rel="stylesheet" href="/css/style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Quill Rich Text Editor -->
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <!-- Quill 2.0 Rich Text Editor -->
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
     <style>
         :root {
             --admin-sidebar-width: 280px;
@@ -166,6 +166,18 @@
         .ql-container {
             border-color: #e5e7eb !important;
             border-radius: 0 0 14px 14px;
+        }
+
+        /* Visible tables in editor */
+        .ql-editor table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 10px 0;
+        }
+        .ql-editor td, .ql-editor th {
+            border: 1px solid #ddd;
+            padding: 5px;
+            min-width: 20px;
         }
 
         .form-actions {
@@ -377,27 +389,102 @@
         </div>
     </main>
 
-    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
     <script>
         lucide.createIcons();
-        
+
         var quill = new Quill('#editor', {
             theme: 'snow',
             modules: {
-                toolbar: [
-                    [{ 'header': [1, 2, 3, false] }],
-                    ['bold', 'italic', 'underline', 'strike'],
-                    ['blockquote', 'code-block'],
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                    ['link', 'image', 'video'],
-                    ['clean']
-                ]
+                table: true,
+                toolbar: {
+                    container: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        ['blockquote', 'code-block'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        ['link', 'image', 'video'],
+                        ['table'],
+                        ['clean'],
+                        ['insert-row-above', 'insert-row-below', 'insert-column-left', 'insert-column-right'],
+                        ['delete-row', 'delete-column', 'delete-table']
+                    ],
+                    handlers: {
+                        'table': function() {
+                            this.quill.getModule('table').insertTable(3, 3);
+                        },
+                        'insert-row-above': function() {
+                            this.quill.getModule('table').insertRowAbove();
+                        },
+                        'insert-row-below': function() {
+                            this.quill.getModule('table').insertRowBelow();
+                        },
+                        'insert-column-left': function() {
+                            this.quill.getModule('table').insertColumnLeft();
+                        },
+                        'insert-column-right': function() {
+                            this.quill.getModule('table').insertColumnRight();
+                        },
+                        'delete-row': function() {
+                            this.quill.getModule('table').deleteRow();
+                        },
+                        'delete-column': function() {
+                            this.quill.getModule('table').deleteColumn();
+                        },
+                        'delete-table': function() {
+                            this.quill.getModule('table').deleteTable();
+                        }
+                    }
+                }
             }
         });
 
+        // Add titles/tooltips to custom buttons
+        const customButtons = {
+            'insert-row-above': 'Thêm hàng trên',
+            'insert-row-below': 'Thêm hàng dưới',
+            'insert-column-left': 'Thêm cột trái',
+            'insert-column-right': 'Thêm cột phải',
+            'delete-row': 'Xóa hàng',
+            'delete-column': 'Xóa cột',
+            'delete-table': 'Xóa toàn bộ bảng'
+        };
+
+        Object.keys(customButtons).forEach(key => {
+            const btn = document.querySelector(`.ql-${key}`);
+            if (btn) {
+                btn.title = customButtons[key];
+                if(key.includes('row')) btn.innerHTML = '<i data-lucide="rows-2" style="width:16px;height:16px;"></i>';
+                else if(key.includes('column')) btn.innerHTML = '<i data-lucide="columns-2" style="width:16px;height:16px;"></i>';
+                else if(key.includes('delete-table')) btn.innerHTML = '<i data-lucide="grid-2x2-x" style="width:16px;height:16px;color:#f43f5e;"></i>';
+                else btn.innerHTML = '<i data-lucide="plus" style="width:14px;height:14px;"></i>';
+            }
+        });
+        lucide.createIcons();
+
         document.getElementById('edit-form').onsubmit = function() {
+            // In Quill 2.0, root.innerHTML is still available
             document.getElementById('content').value = quill.root.innerHTML;
         };
+
+        // Admin sidebar toggle
+        const toggleBtn = document.getElementById('admin-toggle-btn');
+        const sidebar = document.getElementById('admin-sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+                sidebar.classList.add('sidebar-open');
+                overlay.classList.add('active');
+            });
+        }
+
+        if (overlay) {
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('sidebar-open');
+                overlay.classList.remove('active');
+            });
+        }
     </script>
 </body>
 </html>
