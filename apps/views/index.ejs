@@ -1,0 +1,192 @@
+<%
+// Helper to build the query URL for categories
+const buildCatQuery = (cat) => {
+    let q = new URLSearchParams();
+    if (typeof filters !== 'undefined') {
+        // Preserve other filters
+        if (filters.skin_type && filters.skin_type !== 'all') q.set('skin_type', filters.skin_type);
+        if (filters.price_range && filters.price_range !== 'all') q.set('price_range', filters.price_range);
+        if (filters.keyword && filters.keyword !== '') q.set('keyword', filters.keyword);
+        
+        // Toggle category: If same category clicked again, remove it
+        if (filters.category === cat) {
+            q.delete('category');
+        } else {
+            q.set('category', cat);
+        }
+    } else {
+        q.set('category', cat);
+    }
+    const queryStr = q.toString();
+    return queryStr ? '/?' + queryStr : '/';
+}
+%>
+<%- include('partials/header') %>
+
+<!-- Quick Categories Section -->
+<div class="quick-categories-wrapper">
+    <div class="container">
+        <div class="quick-categories">
+            <a href="<%= buildCatQuery('skincare') %>" class="cat-card <%= (typeof filters !== 'undefined' && filters.category === 'skincare') ? 'active' : '' %>">
+                <div class="cat-icon"><i data-lucide="droplets"></i></div>
+                <span>Dưỡng Da</span>
+            </a>
+            <a href="<%= buildCatQuery('makeup') %>" class="cat-card <%= (typeof filters !== 'undefined' && filters.category === 'makeup') ? 'active' : '' %>">
+                <div class="cat-icon"><i data-lucide="sparkles"></i></div>
+                <span>Trang Điểm</span>
+            </a>
+            <a href="<%= buildCatQuery('bodycare') %>" class="cat-card <%= (typeof filters !== 'undefined' && filters.category === 'bodycare') ? 'active' : '' %>">
+                <div class="cat-icon"><i data-lucide="sun"></i></div>
+                <span>Cơ Thể</span>
+            </a>
+            <a href="<%= buildCatQuery('haircare') %>" class="cat-card <%= (typeof filters !== 'undefined' && filters.category === 'haircare') ? 'active' : '' %>">
+                <div class="cat-icon"><i data-lucide="wind"></i></div>
+                <span>Tóc</span>
+            </a>
+            <a href="<%= buildCatQuery('perfume') %>" class="cat-card <%= (typeof filters !== 'undefined' && filters.category === 'perfume') ? 'active' : '' %>">
+                <div class="cat-icon"><i data-lucide="flower"></i></div>
+                <span>Nước Hoa</span>
+            </a>
+            <a href="<%= buildCatQuery('tools') %>" class="cat-card <%= (typeof filters !== 'undefined' && filters.category === 'tools') ? 'active' : '' %>">
+                <div class="cat-icon"><i data-lucide="scissors"></i></div>
+                <span>Dụng Cụ</span>
+            </a>
+            <a href="<%= buildCatQuery('supplements') %>" class="cat-card <%= (typeof filters !== 'undefined' && filters.category === 'supplements') ? 'active' : '' %>">
+                <div class="cat-icon"><i data-lucide="pill"></i></div>
+                <span>Thực Phẩm</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Compact Smart Filter -->
+    <section class="compact-filter-section">
+        <form action="/" method="GET" class="compact-filter-form" 
+              hx-get="/" 
+              hx-trigger="change from:select, keyup delay:500ms changed from:input" 
+              hx-target="#search-results" 
+              hx-select="#search-results" 
+              hx-push-url="true"
+              hx-indicator="#loading-spinner">
+            
+            <% if(typeof filters !== 'undefined' && filters.category && filters.category !== 'all') { %>
+                <input type="hidden" name="category" value="<%= filters.category %>">
+            <% } %>
+            <div class="filter-row">
+                <span class="filter-label"><i data-lucide="filter" size="18"></i> Lọc nhanh:</span>
+                
+                <input type="text" name="keyword" id="keyword-search" class="filter-select compact" 
+                       placeholder="Tìm tên sản phẩm..." 
+                       value="<%= (typeof filters !== 'undefined' && filters.keyword) ? filters.keyword : '' %>" 
+                       style="min-width: 220px;"
+                       autocomplete="off">
+
+                <select name="skin_type" class="filter-select compact">
+                    <option value="all">Mọi loại da</option>
+                    <option value="oily" <%= (typeof filters !== 'undefined' && filters.skin_type === 'oily') ? 'selected' : '' %>>Da dầu</option>
+                    <option value="dry" <%= (typeof filters !== 'undefined' && filters.skin_type === 'dry') ? 'selected' : '' %>>Da khô</option>
+                    <option value="sensitive" <%= (typeof filters !== 'undefined' && filters.skin_type === 'sensitive') ? 'selected' : '' %>>Da nhạy cảm</option>
+                </select>
+                
+                <select name="price_range" class="filter-select compact">
+                    <option value="all">Mọi mức giá</option>
+                    <option value="budget" <%= (typeof filters !== 'undefined' && filters.price_range === 'budget') ? 'selected' : '' %>>Dưới 200k</option>
+                    <option value="mid-range" <%= (typeof filters !== 'undefined' && filters.price_range === 'mid-range') ? 'selected' : '' %>>200k - 500k</option>
+                    <option value="luxury" <%= (typeof filters !== 'undefined' && filters.price_range === 'luxury') ? 'selected' : '' %>>Trên 500k</option>
+                </select>
+                
+                <!-- Hidden button but kept for accessibility/native fallback -->
+                <button type="submit" class="btn-filter compact" style="display: none;">Tìm kiếm</button>
+                
+                <div id="loading-spinner" class="htmx-indicator">
+                    <i data-lucide="loader-2" class="animate-spin"></i>
+                </div>
+            </div>
+        </form>
+    </section>
+
+    <div id="search-results">
+    <% if (articles.length > 0) { %>
+        <!-- Lựa chọn của Biên tập viên -->
+        <section class="featured-section">
+            <h2 class="section-title">Gợi ý từ PurePick <i data-lucide="flame" style="color: #f43f5e;"></i></h2>
+            <div class="featured-card">
+                <div class="featured-thumb">
+                    <a href="/post/<%= articles[0].slug %>">
+                        <% if (articles[0].thumbnail) { %>
+                            <img src="<%= articles[0].thumbnail %>" alt="<%= articles[0].title %>">
+                        <% } else { %>
+                            <div class="no-thumb"><i data-lucide="image-off"></i></div>
+                        <% } %>
+                    </a>
+                    <% if (articles[0].category) { %>
+                        <span class="card-badge"><%= articles[0].category === 'skincare' ? 'CHĂM SÓC DA' : articles[0].category === 'makeup' ? 'TRANG ĐIỂM' : articles[0].category.toUpperCase() %></span>
+                    <% } %>
+                </div>
+                <div class="featured-content">
+                    <h2><a href="/post/<%= articles[0].slug %>"><%= articles[0].title %></a></h2>
+                    <p class="featured-excerpt">
+                        <%= articles[0].excerpt || (articles[0].content ? articles[0].content.replace(/<[^>]*>?/gm, '').substring(0, 180) + '...' : '') %>
+                    </p>
+                    <div class="article-meta">
+                        <span class="article-date">
+                            <i data-lucide="tag" size="16"></i>
+                            <%= articles[0].skin_type === 'oily' ? 'Da dầu' : articles[0].skin_type === 'dry' ? 'Da khô' : articles[0].skin_type === 'sensitive' ? 'Da nhạy cảm' : 'Mọi loại da' %>
+                        </span>
+                        <a href="/post/<%= articles[0].slug %>" class="read-more">Đọc đánh giá chi tiết <i data-lucide="arrow-right" size="16"></i></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bài viết mới nhất -->
+        <% if (articles.length > 1) { %>
+            <section class="latest-section">
+                <h2 class="section-title">Review Mới Nhất <i data-lucide="clock" style="color: var(--primary-color);"></i></h2>
+                <div class="articles-grid">
+                    <% for(let i = 1; i < articles.length; i++) { const article = articles[i]; %>
+                        <article class="article-card">
+                            <div class="article-thumb">
+                                <a href="/post/<%= article.slug %>">
+                                    <% if (article.thumbnail) { %>
+                                        <img src="<%= article.thumbnail %>" alt="<%= article.title %>">
+                                    <% } else { %>
+                                        <div class="no-thumb"><i data-lucide="image-off"></i></div>
+                                    <% } %>
+                                </a>
+                                <% if (article.category) { %>
+                                    <span class="card-badge"><%= article.category === 'skincare' ? 'CHĂM SÓC DA' : article.category === 'makeup' ? 'TRANG ĐIỂM' : article.category.toUpperCase() %></span>
+                                <% } %>
+                            </div>
+                            <div class="article-card-content">
+                                <h2><a href="/post/<%= article.slug %>"><%= article.title %></a></h2>
+                                <p class="article-excerpt">
+                                    <%= article.excerpt || (article.content ? article.content.replace(/<[^>]*>?/gm, '').substring(0, 120) + '...' : '') %>
+                                </p>
+                                <div class="article-meta">
+                                    <span class="article-date">
+                                        <i data-lucide="tag" size="16"></i>
+                                        <%= article.skin_type === 'oily' ? 'Da dầu' : article.skin_type === 'dry' ? 'Da khô' : article.skin_type === 'sensitive' ? 'Da nhạy cảm' : 'Mọi loại da' %>
+                                    </span>
+                                    <a href="/post/<%= article.slug %>" class="read-more">Xem chi tiết <i data-lucide="arrow-right" size="16"></i></a>
+                                </div>
+                            </div>
+                        </article>
+                    <% } %>
+                </div>
+            </section>
+        <% } %>
+
+    <% } else { %>
+        <div class="empty-state glass" style="padding: 5rem; border-radius: var(--radius); margin-bottom: 6rem;">
+            <i data-lucide="frown" size="48" style="color: var(--text-muted); margin-bottom: 1rem;"></i>
+            <h2>Rất tiếc, không tìm thấy sản phẩm phù hợp</h2>
+            <p>Thử thay đổi các lựa chọn lọc để tìm thấy nhiều kết quả hơn nhé!</p>
+            <a href="/" class="btn-primary" style="margin-top: 1.5rem; display: inline-flex;">Xem tất cả bài viết</a>
+        </div>
+    <% } %>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

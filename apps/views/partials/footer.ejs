@@ -1,0 +1,102 @@
+</main>
+<footer class="site-footer">
+    <div class="container">
+        <div class="footer-grid">
+            <!-- Brand Column -->
+            <div class="footer-brand">
+                <a href="/" class="logo">
+                    <i data-lucide="sparkles"></i>
+                    <span>PurePick</span>
+                </a>
+                <p>PurePick - Thư viện review mỹ phẩm chân thực, giúp phụ nữ Việt tìm ra "chân ái" cho làn da một cách khoa học và tiết kiệm nhất.</p>
+                <div class="social-links" style="margin-top: 2rem;">
+                    <a href="#" class="social-btn"><i data-lucide="facebook"></i></a>
+                    <a href="#" class="social-btn"><i data-lucide="instagram"></i></a>
+                    <a href="#" class="social-btn"><i data-lucide="youtube"></i></a>
+                </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div>
+                <h4 class="footer-heading">Khám Phá</h4>
+                <ul class="footer-links">
+                    <li><a href="/">Trang chủ</a></li>
+                    <li><a href="/about">Về PurePick</a></li>
+                    <li><a href="#">Tất cả review</a></li>
+                    <li><a href="#">Cẩm nang làm đẹp</a></li>
+                </ul>
+            </div>
+
+            <!-- Categories -->
+            <div>
+                <h4 class="footer-heading">Danh Mục Hot</h4>
+                <ul class="footer-links">
+                    <li><a href="/?category=skincare">Chăm sóc da</a></li>
+                    <li><a href="/?category=makeup">Trang điểm</a></li>
+                    <li><a href="/?category=perfume">Nước hoa</a></li>
+                    <li><a href="/?category=haircare">Chăm sóc tóc</a></li>
+                </ul>
+            </div>
+
+            <!-- Contact/Support -->
+            <div>
+                <h4 class="footer-heading">Hỗ Trợ</h4>
+                <ul class="footer-links">
+                    <li><a href="#">Liên hệ hợp tác</a></li>
+                    <li><a href="#">Chính sách bảo mật</a></li>
+                    <li><a href="#">Điều khoản sử dụng</a></li>
+                    <li><a href="/admin/login">Quản trị viên</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Footer Bottom -->
+        <div class="footer-bottom">
+            <p class="disclaimer">
+                <strong>Miễn trừ trách nhiệm:</strong> Nội dung trên PurePick dựa trên trải nghiệm cá nhân và kiến thức tổng hợp. Hiệu quả sản phẩm có thể khác nhau tùy vào cơ địa mỗi người. Chúng mình khuyến khích bạn thử nghiệm vùng da nhỏ trước khi sử dụng toàn mặt.
+            </p>
+            <p style="margin-top: 1.5rem;">&copy; 2024 PurePick. Tất cả bản quyền được bảo lưu.</p>
+        </div>
+    </div>
+</footer>
+
+<button id="back-to-top" title="Quay lại đầu trang">
+    <i data-lucide="arrow-up"></i>
+</button>
+
+<script>
+    function initFooter() {
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Re-initialize back to top button click listener
+        const backToTopBtn = document.getElementById('back-to-top');
+        if (backToTopBtn) {
+            const newBtn = backToTopBtn.cloneNode(true);
+            backToTopBtn.parentNode.replaceChild(newBtn, backToTopBtn);
+            newBtn.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
+    }
+
+    // Scroll event listener for window only needs to be attached once
+    if (!window.scrollListenerAttached) {
+        window.addEventListener('scroll', () => {
+            const btn = document.getElementById('back-to-top');
+            if (btn) {
+                if (window.pageYOffset > 300) {
+                    btn.classList.add('show');
+                } else {
+                    btn.classList.remove('show');
+                }
+            }
+        });
+        window.scrollListenerAttached = true;
+    }
+
+    document.addEventListener('DOMContentLoaded', initFooter);
+    document.addEventListener('htmx:afterSettle', initFooter);
+</script>
+</body>
+</html>

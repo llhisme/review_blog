@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Admin Panel</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Quill Rich Text Editor -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <style>
+        :root {
+            --admin-sidebar-width: 280px;
+        }
+
+        body.admin-body {
+            background: var(--bg-color);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar - Same as Dashboard */
+        .admin-sidebar {
+            width: var(--admin-sidebar-width);
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            color: white;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-brand {
+            padding: 2.5rem 2rem;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-light);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 1rem 1.25rem;
+            flex-grow: 1;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 12px;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-menu a.active {
+            background: var(--primary-color);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .sidebar-footer {
+            padding: 2rem 1.25rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .logout-link {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            color: #fb7185;
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 12px;
+            transition: all 0.2s;
+        }
+
+        .logout-link:hover {
+            background: rgba(251, 113, 133, 0.1);
+        }
+
+        /* Main Content */
+        .admin-main {
+            flex-grow: 1;
+            margin-left: var(--admin-sidebar-width);
+            padding: 3rem;
+            width: 100%;
+        }
+
+        .admin-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 3rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid rgba(0, 0, 0, 0.03);
+        }
+
+        .form-header {
+            margin-bottom: 3rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .form-header h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group { margin-bottom: 2rem; }
+        .form-group label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--text-color);
+            font-size: 0.95rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.2s;
+            background: #f9fafb;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        #editor {
+            height: 500px;
+            border-radius: 0 0 14px 14px;
+            font-size: 1.1rem;
+        }
+
+        .ql-toolbar { 
+            border-radius: 14px 14px 0 0; 
+            background: #f9fafb;
+            border-color: #e5e7eb !important;
+        }
+        
+        .ql-container {
+            border-color: #e5e7eb !important;
+            border-radius: 0 0 14px 14px;
+        }
+
+        .form-actions {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid #f3f4f6;
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .btn {
+            padding: 1rem 2.5rem;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: var(--text-muted);
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+            color: var(--text-color);
+        }
+
+        @media (max-width: 1024px) {
+            .admin-sidebar { 
+                transform: translateX(-100%);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .admin-sidebar.sidebar-open {
+                transform: translateX(0);
+            }
+            .admin-main { margin-left: 0; padding: 1.5rem; }
+        }
+
+        .admin-toggle-btn {
+            display: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            background: white;
+            color: var(--text-color);
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 990;
+        }
+
+        .sidebar-overlay.active { display: block; }
+
+        @media (max-width: 1024px) {
+            .admin-toggle-btn { display: flex; }
+        }
+    </style>
+</head>
+<body class="admin-body">
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <aside class="admin-sidebar" id="admin-sidebar">
+        <div class="sidebar-brand">
+            <i data-lucide="sparkles"></i> <span>PurePick Admin</span>
+        </div>
+        <nav class="sidebar-menu">
+            <a href="/admin/dashboard">
+                <i data-lucide="layout-dashboard"></i> <span>Dashboard</span>
+            </a>
+            <a href="/admin/new" class="<%= !isEdit ? 'active' : '' %>">
+                <i data-lucide="plus-circle"></i> <span>Viết bài mới</span>
+            </a>
+            <a href="/" target="_blank">
+                <i data-lucide="external-link"></i> <span>Xem Website</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="/admin/logout" class="logout-link">
+                <i data-lucide="log-out"></i> <span>Đăng xuất</span>
+            </a>
+        </div>
+    </aside>
+
+    <main class="admin-main">
+        <div class="form-header" style="display: flex; align-items: center; gap: 1rem; border-bottom: none; margin-bottom: 2rem;">
+             <button class="admin-toggle-btn" id="admin-toggle-btn">
+                <i data-lucide="menu"></i>
+            </button>
+            <div>
+                <h2 style="margin-bottom: 0;"><%= isEdit ? 'Sửa bài viết' : 'Viết bài mới' %></h2>
+                <p style="color: var(--text-muted); font-weight: 500;">Hoàn thiện nội dung bài viết để tối ưu trải nghiệm người dùng.</p>
+            </div>
+        </div>
+
+        <div class="admin-card">
+            <form action="/admin/save" method="POST" id="edit-form">
+                <% if (isEdit) { %>
+                    <input type="hidden" name="id" value="<%= article.id %>">
+                <% } %>
+
+                <div class="form-group">
+                    <label for="title">Tiêu đề bài review <span style="color: #f43f5e;">*</span></label>
+                    <input type="text" id="title" name="title" class="form-control" value="<%= article ? article.title : '' %>" placeholder="VD: Đánh giá chi tiết Kem chống nắng La Roche-Posay Anthelios" required>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <div class="form-group">
+                        <label for="slug">Đường dẫn thân thiện (Slug) <span style="color: #f43f5e;">*</span></label>
+                        <input type="text" id="slug" name="slug" class="form-control" value="<%= article ? article.slug : '' %>" placeholder="review-kem-chong-nang-laroche-posay" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="thumbnail">Ảnh đại diện bài viết (URL)</label>
+                        <input type="text" id="thumbnail" name="thumbnail" class="form-control" value="<%= article ? article.thumbnail || '' : '' %>" placeholder="https://unsplash.com/photos/...">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2rem;">
+                    <div class="form-group">
+                        <label for="category">Danh mục</label>
+                        <select id="category" name="category" class="form-control">
+                            <option value="skincare" <%= (article && article.category === 'skincare') ? 'selected' : '' %>>Dưỡng Da</option>
+                            <option value="makeup" <%= (article && article.category === 'makeup') ? 'selected' : '' %>>Trang Điểm</option>
+                            <option value="bodycare" <%= (article && article.category === 'bodycare') ? 'selected' : '' %>>Cơ Thể</option>
+                            <option value="haircare" <%= (article && article.category === 'haircare') ? 'selected' : '' %>>Tóc</option>
+                            <option value="perfume" <%= (article && article.category === 'perfume') ? 'selected' : '' %>>Nước Hoa</option>
+                            <option value="tools" <%= (article && article.category === 'tools') ? 'selected' : '' %>>Dụng Cụ</option>
+                            <option value="supplements" <%= (article && article.category === 'supplements') ? 'selected' : '' %>>Thực Phẩm</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="skin_type">Loại da</label>
+                        <select id="skin_type" name="skin_type" class="form-control">
+                            <option value="all" <%= (!article || article.skin_type === 'all') ? 'selected' : '' %>>Mọi loại da</option>
+                            <option value="oily" <%= (article && article.skin_type === 'oily') ? 'selected' : '' %>>Da dầu</option>
+                            <option value="dry" <%= (article && article.skin_type === 'dry') ? 'selected' : '' %>>Da khô</option>
+                            <option value="sensitive" <%= (article && article.skin_type === 'sensitive') ? 'selected' : '' %>>Da nhạy cảm</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="price_range">Mức giá</label>
+                        <select id="price_range" name="price_range" class="form-control">
+                            <option value="all" <%= (!article || article.price_range === 'all') ? 'selected' : '' %>>Mọi mức giá</option>
+                            <option value="budget" <%= (article && article.price_range === 'budget') ? 'selected' : '' %>>Bình dân (< 200k)</option>
+                            <option value="mid-range" <%= (article && article.price_range === 'mid-range') ? 'selected' : '' %>>Tầm trung (200k-500k)</option>
+                            <option value="luxury" <%= (article && article.price_range === 'luxury') ? 'selected' : '' %>>Cao cấp (> 500k)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="excerpt">Tóm tắt ngắn (Xuất hiện ở trang chủ)</label>
+                    <textarea id="excerpt" name="excerpt" class="form-control" rows="3" style="resize: vertical;" placeholder="Viết một vài câu lôi cuốn người đọc..."><%= article ? article.excerpt || '' : '' %></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Nội dung review chi tiết <span style="color: #f43f5e;">*</span></label>
+                    <div id="editor"><%- article ? article.content : '' %></div>
+                    <input type="hidden" name="content" id="content">
+                </div>
+
+                <div class="form-group">
+                    <label for="affiliate_link">Liên kết mua hàng (Affiliate Link)</label>
+                    <input type="text" id="affiliate_link" name="affiliate_link" class="form-control" value="<%= article ? article.affiliate_link || '' : '' %>" placeholder="https://shope.ee/...">
+                </div>
+
+                <div class="form-group">
+                    <label for="status">Chế độ hiển thị</label>
+                    <select id="status" name="status" class="form-control">
+                        <option value="active" <%= (article && article.status === 'active') ? 'selected' : '' %>>✅ Công khai (Mọi người đều thấy)</option>
+                        <option value="inactive" <%= (article && article.status === 'inactive') ? 'selected' : '' %>>🔒 Lưu nháp (Chỉ quản trị viên thấy)</option>
+                    </select>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i data-lucide="save"></i> <%= isEdit ? 'Cập nhật bài viết' : 'Xuất bản ngay' %>
+                    </button>
+                    <a href="/admin/dashboard" class="btn btn-secondary">Hủy và quay lại</a>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script>
+        lucide.createIcons();
+        
+        var quill = new Quill('#editor', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    ['blockquote', 'code-block'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    ['link', 'image', 'video'],
+                    ['clean']
+                ]
+            }
+        });
+
+        document.getElementById('edit-form').onsubmit = function() {
+            document.getElementById('content').value = quill.root.innerHTML;
+        };
+    </script>
+</body>
+</html>

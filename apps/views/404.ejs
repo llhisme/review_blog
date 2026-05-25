@@ -1,0 +1,13 @@
+<%- include('partials/header') %>
+
+        <div class="error-page">
+                <h1>
+                        <%= title || '404' %>
+                </h1>
+                <p>
+                        <%= typeof message !=='undefined' ? message : 'Trang bạn tìm không tồn tại!' %>
+                </p>
+                <a href="/" class="btn">Về trang chủ</a>
+        </div>
+
+        <%- include('partials/footer') %>

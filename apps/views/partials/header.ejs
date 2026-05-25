@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>
+                <%= typeof title !=='undefined' ? title : 'PurePick - Review Mỹ phẩm Chuyên sâu' %>
+        </title>
+        <link rel="stylesheet" href="/css/style.css">
+        <% if (typeof description !=='undefined' ) { %>
+                <meta name="description" content="<%= description %>">
+                <% } %>
+        <!-- Lucide Icons -->
+        <script src="https://unpkg.com/lucide@latest"></script>
+        <!-- HTMX for SPA transitions -->
+        <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+        <!-- NProgress for loading bar -->
+        <script src="https://unpkg.com/nprogress@0.2.0/nprogress.js"></script>
+        <link rel="stylesheet" href="https://unpkg.com/nprogress@0.2.0/nprogress.css" />
+        <style>
+            #nprogress .bar { background: var(--primary-color) !important; height: 3px !important; }
+            #nprogress .peg { box-shadow: 0 0 10px var(--primary-color), 0 0 5px var(--primary-color) !important; }
+            #nprogress .spinner-icon { border-top-color: var(--primary-color) !important; border-left-color: var(--primary-color) !important; }
+        </style>
+</head>
+
+<body hx-boost="true">
+        <header class="site-header">
+                <div class="container">
+                        <nav class="navbar">
+                                <a href="/" class="logo">
+                                        <i data-lucide="sparkles"></i>
+                                        <span>PurePick</span>
+                                </a>
+                                <button class="mobile-menu-btn" id="mobile-menu-btn">
+                                        <i data-lucide="menu"></i>
+                                </button>
+                                <ul class="nav-menu" id="nav-menu">
+                                        <li><a href="/">Trang Chủ</a></li>
+                                        <li><a href="/about">Giới Thiệu</a></li>
+                                </ul>
+                        </nav>
+                </div>
+        </header>
+
+        <script>
+                // HTMX Loading Bar
+                document.addEventListener('htmx:sendStart', () => NProgress.start());
+                document.addEventListener('htmx:afterSettle', () => NProgress.done());
+                document.addEventListener('htmx:sendError', () => NProgress.done());
+
+                // Enable View Transitions
+                htmx.config.globalViewTransitions = true;
+
+                // Mobile menu toggle logic
+                function initMobileMenu() {
+                        const menuBtn = document.getElementById('mobile-menu-btn');
+                        const navMenu = document.getElementById('nav-menu');
+
+                        if (menuBtn && navMenu) {
+                                // Clone node to remove old event listeners before adding new one
+                                const newMenuBtn = menuBtn.cloneNode(true);
+                                menuBtn.parentNode.replaceChild(newMenuBtn, menuBtn);
+
+                                newMenuBtn.addEventListener('click', () => {
+                                        navMenu.classList.toggle('active');
+                                        const icon = newMenuBtn.querySelector('i');
+                                        if (navMenu.classList.contains('active')) {
+                                                icon.setAttribute('data-lucide', 'x');
+                                        } else {
+                                                icon.setAttribute('data-lucide', 'menu');
+                                        }
+                                        lucide.createIcons();
+                                });
+                        }
+                }
+
+                document.addEventListener('DOMContentLoaded', initMobileMenu);
+                document.addEventListener('htmx:afterSettle', initMobileMenu);
+        </script>
+        <main>

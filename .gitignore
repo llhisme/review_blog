@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env (IMPORTANT: Never commit secrets)
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Project specific temp/test scripts (Optional: keep if you want to share setup)
+# seed_*.js
+# update_*.js
+# hash_password.js
+
+# Build/Dist
+dist/
+build/

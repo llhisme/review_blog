@@ -1,0 +1,174 @@
+<%- include('partials/header') %>
+
+<div class="container">
+    <div class="post-layout-container">
+        <!-- Sidebar with Table of Contents -->
+        <aside class="post-sidebar">
+            <div class="toc-card">
+                <h3><i data-lucide="list"></i> Nội dung chính</h3>
+                <nav>
+                    <ul class="toc-list" id="toc-list">
+                        <!-- ToC items will be generated here -->
+                    </ul>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Article Content -->
+        <article class="full-post">
+            <header class="post-header">
+                <h1><%= article.title %></h1>
+                <div class="post-meta">
+                    <span>
+                        <i data-lucide="calendar" size="18"></i>
+                        Ngày đăng: <%= new Date(article.created_at).toLocaleDateString('vi-VN') %>
+                    </span>
+                    <% if (article.updated_at) { %>
+                        <span>
+                            <i data-lucide="refresh-cw" size="18"></i>
+                            Cập nhật: <%= new Date(article.updated_at).toLocaleDateString('vi-VN') %>
+                        </span>
+                    <% } %>
+                </div>
+            </header>
+
+            <div class="post-content" id="article-content">
+                <%- article.content %>
+            </div>
+
+            <% if (article.affiliate_link) { %>
+            <div class="affiliate-box">
+                <div class="affiliate-icon">
+                    <i data-lucide="shopping-cart"></i>
+                </div>
+                <div class="affiliate-info">
+                    <h3>Ưu đãi dành riêng cho bạn!</h3>
+                    <p>Sản phẩm này hiện đang có giá tốt nhất tại cửa hàng chính hãng.</p>
+                </div>
+                <a href="<%= article.affiliate_link %>" target="_blank" rel="nofollow" class="affiliate-btn">
+                    <span>Mua ngay</span>
+                    <i data-lucide="external-link" size="16"></i>
+                </a>
+            </div>
+            <p class="disclaimer-text">* Lưu ý: Đây là liên kết tiếp thị, mình có thể nhận được một khoản hoa hồng nhỏ nếu bạn mua qua link này mà không tốn thêm bất kỳ chi phí nào cho bạn.</p>
+            <% } %>
+
+            <div class="post-footer">
+                <div class="share-links">
+                    <a href="https://www.facebook.com/sharer/sharer.php?u=<%= encodeURIComponent(SITE_URL + '/post/' + article.slug) %>" target="_blank" class="share-btn">
+                        <i data-lucide="facebook" size="18" style="vertical-align: middle; margin-right: 5px;"></i>
+                        Chia sẻ Facebook
+                    </a>
+                </div>                <div class="back-link">
+                    <a href="/">
+                        <i data-lucide="chevron-left" size="18" style="vertical-align: middle;"></i>
+                        Quay lại trang chủ
+                    </a>
+                </div>
+            </div>
+        </article>
+    </div>
+
+    <!-- Related Articles -->
+    <% if (typeof relatedArticles !== 'undefined' && relatedArticles.length > 0) { %>
+    <section class="related-section" style="margin-top: 5rem; border-top: 1px solid #e2e8f0; padding-top: 3rem; margin-bottom: 6rem;">
+        <h2 class="section-title">Có thể nàng sẽ thích <i data-lucide="heart" style="color: #ec4899;"></i></h2>
+        <div class="articles-grid">
+            <% relatedArticles.forEach(function(rel) { %>
+            <article class="article-card">
+                <div class="article-thumb">
+                    <a href="/post/<%= rel.slug %>">
+                        <% if (rel.thumbnail) { %>
+                            <img src="<%= rel.thumbnail %>" alt="<%= rel.title %>">
+                        <% } else { %>
+                            <div class="no-thumb"><i data-lucide="image-off"></i></div>
+                        <% } %>
+                    </a>
+                </div>
+                <div class="article-card-content">
+                    <h2 style="font-size: 1.1rem;"><a href="/post/<%= rel.slug %>"><%= rel.title %></a></h2>
+                    <div class="article-meta">
+                        <span class="article-date">
+                            <i data-lucide="tag" size="14"></i>
+                            <%= rel.skin_type === 'oily' ? 'Da dầu' : rel.skin_type === 'dry' ? 'Da khô' : rel.skin_type === 'sensitive' ? 'Da nhạy cảm' : 'Mọi loại da' %>
+                        </span>
+                        <a href="/post/<%= rel.slug %>" class="read-more" style="font-size: 0.85rem;">Xem ngay</a>
+                    </div>
+                </div>
+            </article>
+            <% }); %>
+        </div>
+    </section>
+    <% } %>
+</div>
+
+<script>
+    function initToc() {
+        const articleContent = document.getElementById('article-content');
+        const tocList = document.getElementById('toc-list');
+        if (!articleContent || !tocList) return;
+
+        const headers = articleContent.querySelectorAll('h2');
+        
+        // Reset ToC if re-initializing
+        tocList.innerHTML = '';
+
+        if (headers.length === 0) {
+            const sidebar = document.querySelector('.post-sidebar');
+            const layout = document.querySelector('.post-layout-container');
+            if (sidebar) sidebar.style.display = 'none';
+            if (layout) layout.style.gridTemplateColumns = '1fr';
+            return;
+        }
+
+        headers.forEach((header, index) => {
+            // Create unique ID for each header
+            const id = 'section-' + (index + 1);
+            header.setAttribute('id', id);
+
+            // Create ToC link
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.setAttribute('href', '#' + id);
+            a.textContent = header.textContent;
+            
+            // Smooth scroll
+            a.addEventListener('click', (e) => {
+                e.preventDefault();
+                header.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                // Optional: offset for sticky header
+                window.scrollBy(0, -100);
+            });
+
+            li.appendChild(a);
+            tocList.appendChild(li);
+        });
+
+        // Scrollspy for active ToC item
+        if (!window.tocScrollAttached) {
+            window.addEventListener('scroll', () => {
+                let current = '';
+                const currentHeaders = document.querySelectorAll('#article-content h2');
+                currentHeaders.forEach(header => {
+                    const headerTop = header.offsetTop;
+                    if (window.pageYOffset >= headerTop - 120) {
+                        current = header.getAttribute('id');
+                    }
+                });
+
+                document.querySelectorAll('.toc-list a').forEach(a => {
+                    a.classList.remove('active');
+                    if (a.getAttribute('href') === '#' + current) {
+                        a.classList.add('active');
+                    }
+                });
+            });
+            window.tocScrollAttached = true;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', initToc);
+    document.addEventListener('htmx:afterSettle', initToc);
+</script>
+
+<%- include('partials/footer') %>
