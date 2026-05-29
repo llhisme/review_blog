@@ -536,23 +536,30 @@ body {
     font-size: 1rem;
 }
 
-/* Hiệu ứng Hover Desktop */
-.article-card:hover .article-excerpt,
-.featured-card:hover .featured-excerpt-overlay {
-    opacity: 1;
-    transform: translateY(0);
+/* 3. Cơ chế Ẩn/Hiện theo thiết bị và khả năng tương tác */
+
+/* Mặc định cho màn hình nhỏ, Tablet HOẶC thiết bị Cảm ứng (Touch) */
+.mobile-only {
+    display: block !important;
+}
+.desktop-only {
+    display: none !important;
 }
 
-/* 3. Cơ chế Ẩn/Hiện theo thiết bị */
-@media (min-width: 901px) {
+/* CHỈ dành cho Màn hình thực sự lớn (Laptop/PC > 1200px) có khả năng Hover */
+@media (hover: hover) and (pointer: fine) and (min-width: 1201px) {
     .mobile-only {
         display: none !important;
     }
-}
-
-@media (max-width: 900px) {
     .desktop-only {
-        display: none !important;
+        display: flex !important; /* Giữ flex để căn lề dưới */
+    }
+
+    /* Hiệu ứng Hover Desktop chỉ kích hoạt khi màn hình lớn và có chuột */
+    .article-card:hover .article-excerpt,
+    .featured-card:hover .featured-excerpt-overlay {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 
@@ -630,11 +637,23 @@ body {
 
 /* RESPONSIVE BREAKPOINTS */
 @media (max-width: 1200px) {
-    .featured-card { gap: 2rem; }
+    .featured-card { gap: 2.5rem; }
 }
 
 @media (max-width: 1024px) {
-    .featured-card { grid-template-columns: 1fr; }
+    /* Cho Tablet & Mobile: Xếp chồng dọc để không bị hẹp chữ */
+    .featured-card { 
+        grid-template-columns: 1fr; 
+        gap: 1.5rem;
+    }
+    
+    .featured-thumb {
+        aspect-ratio: 16 / 10;
+    }
+
+    .article-thumb {
+        aspect-ratio: 16 / 10;
+    }
 }
 
 @media (max-width: 768px) {
