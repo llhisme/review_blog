@@ -840,6 +840,7 @@ body {
     visibility: hidden;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     transform: translateY(20px);
+    view-transition-name: back-to-top-button;
 }
 
 #back-to-top.show {
