@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %> - Admin Panel</title>
+    <title>
+        <%= title %> - Admin Panel
+    </title>
     <link rel="stylesheet" href="/css/style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Quill 2.0 Rich Text Editor -->
@@ -65,7 +68,8 @@
             font-weight: 600;
         }
 
-        .sidebar-menu a:hover, .sidebar-menu a.active {
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
             color: white;
             background: rgba(255, 255, 255, 0.1);
         }
@@ -124,7 +128,10 @@
             margin-bottom: 0.5rem;
         }
 
-        .form-group { margin-bottom: 2rem; }
+        .form-group {
+            margin-bottom: 2rem;
+        }
+
         .form-group label {
             display: block;
             font-weight: 700;
@@ -157,12 +164,12 @@
             font-size: 1.1rem;
         }
 
-        .ql-toolbar { 
-            border-radius: 14px 14px 0 0; 
+        .ql-toolbar {
+            border-radius: 14px 14px 0 0;
             background: #f9fafb;
             border-color: #e5e7eb !important;
         }
-        
+
         .ql-container {
             border-color: #e5e7eb !important;
             border-radius: 0 0 14px 14px;
@@ -174,7 +181,9 @@
             width: 100%;
             margin: 10px 0;
         }
-        .ql-editor td, .ql-editor th {
+
+        .ql-editor td,
+        .ql-editor th {
             border: 1px solid #ddd;
             padding: 5px;
             min-width: 20px;
@@ -225,14 +234,19 @@
         }
 
         @media (max-width: 1024px) {
-            .admin-sidebar { 
+            .admin-sidebar {
                 transform: translateX(-100%);
                 transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             }
+
             .admin-sidebar.sidebar-open {
                 transform: translateX(0);
             }
-            .admin-main { margin-left: 0; padding: 1.5rem; }
+
+            .admin-main {
+                margin-left: 0;
+                padding: 1.5rem;
+            }
         }
 
         .admin-toggle-btn {
@@ -258,13 +272,18 @@
             z-index: 990;
         }
 
-        .sidebar-overlay.active { display: block; }
+        .sidebar-overlay.active {
+            display: block;
+        }
 
         @media (max-width: 1024px) {
-            .admin-toggle-btn { display: flex; }
+            .admin-toggle-btn {
+                display: flex;
+            }
         }
     </style>
 </head>
+
 <body class="admin-body">
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
     <aside class="admin-sidebar" id="admin-sidebar">
@@ -290,13 +309,17 @@
     </aside>
 
     <main class="admin-main">
-        <div class="form-header" style="display: flex; align-items: center; gap: 1rem; border-bottom: none; margin-bottom: 2rem;">
-             <button class="admin-toggle-btn" id="admin-toggle-btn">
+        <div class="form-header"
+            style="display: flex; align-items: center; gap: 1rem; border-bottom: none; margin-bottom: 2rem;">
+            <button class="admin-toggle-btn" id="admin-toggle-btn">
                 <i data-lucide="menu"></i>
             </button>
             <div>
-                <h2 style="margin-bottom: 0;"><%= isEdit ? 'Sửa bài viết' : 'Viết bài mới' %></h2>
-                <p style="color: var(--text-muted); font-weight: 500;">Hoàn thiện nội dung bài viết để tối ưu trải nghiệm người dùng.</p>
+                <h2 style="margin-bottom: 0;">
+                    <%= isEdit ? 'Sửa bài viết' : 'Viết bài mới' %>
+                </h2>
+                <p style="color: var(--text-muted); font-weight: 500;">Hoàn thiện nội dung bài viết để tối ưu trải
+                    nghiệm người dùng.</p>
             </div>
         </div>
 
@@ -304,87 +327,116 @@
             <form action="/admin/save" method="POST" id="edit-form">
                 <% if (isEdit) { %>
                     <input type="hidden" name="id" value="<%= article.id %>">
-                <% } %>
+                    <% } %>
 
-                <div class="form-group">
-                    <label for="title">Tiêu đề bài review <span style="color: #f43f5e;">*</span></label>
-                    <input type="text" id="title" name="title" class="form-control" value="<%= article ? article.title : '' %>" placeholder="VD: Đánh giá chi tiết Kem chống nắng La Roche-Posay Anthelios" required>
-                </div>
+                        <div class="form-group">
+                            <label for="title">Tiêu đề bài review <span style="color: #f43f5e;">*</span></label>
+                            <input type="text" id="title" name="title" class="form-control"
+                                value="<%= article ? article.title : '' %>"
+                                placeholder="VD: Đánh giá chi tiết Kem chống nắng La Roche-Posay Anthelios" required>
+                        </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-                    <div class="form-group">
-                        <label for="slug">Đường dẫn thân thiện (Slug) <span style="color: #f43f5e;">*</span></label>
-                        <input type="text" id="slug" name="slug" class="form-control" value="<%= article ? article.slug : '' %>" placeholder="review-kem-chong-nang-laroche-posay" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="thumbnail">Ảnh đại diện bài viết (URL)</label>
-                        <input type="text" id="thumbnail" name="thumbnail" class="form-control" value="<%= article ? article.thumbnail || '' : '' %>" placeholder="https://unsplash.com/photos/...">
-                    </div>
-                </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                            <div class="form-group">
+                                <label for="slug">Đường dẫn thân thiện (Slug) <span
+                                        style="color: #f43f5e;">*</span></label>
+                                <input type="text" id="slug" name="slug" class="form-control"
+                                    value="<%= article ? article.slug : '' %>"
+                                    placeholder="review-kem-chong-nang-laroche-posay" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="thumbnail">Ảnh đại diện bài viết (URL)</label>
+                                <input type="text" id="thumbnail" name="thumbnail" class="form-control"
+                                    value="<%= article ? article.thumbnail || '' : '' %>"
+                                    placeholder="https://unsplash.com/photos/...">
+                            </div>
+                        </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2rem;">
-                    <div class="form-group">
-                        <label for="category">Danh mục</label>
-                        <select id="category" name="category" class="form-control">
-                            <option value="skincare" <%= (article && article.category === 'skincare') ? 'selected' : '' %>>Dưỡng Da</option>
-                            <option value="makeup" <%= (article && article.category === 'makeup') ? 'selected' : '' %>>Trang Điểm</option>
-                            <option value="bodycare" <%= (article && article.category === 'bodycare') ? 'selected' : '' %>>Cơ Thể</option>
-                            <option value="haircare" <%= (article && article.category === 'haircare') ? 'selected' : '' %>>Tóc</option>
-                            <option value="perfume" <%= (article && article.category === 'perfume') ? 'selected' : '' %>>Nước Hoa</option>
-                            <option value="tools" <%= (article && article.category === 'tools') ? 'selected' : '' %>>Dụng Cụ</option>
-                            <option value="supplements" <%= (article && article.category === 'supplements') ? 'selected' : '' %>>Thực Phẩm</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="skin_type">Loại da</label>
-                        <select id="skin_type" name="skin_type" class="form-control">
-                            <option value="all" <%= (!article || article.skin_type === 'all') ? 'selected' : '' %>>Mọi loại da</option>
-                            <option value="oily" <%= (article && article.skin_type === 'oily') ? 'selected' : '' %>>Da dầu</option>
-                            <option value="dry" <%= (article && article.skin_type === 'dry') ? 'selected' : '' %>>Da khô</option>
-                            <option value="sensitive" <%= (article && article.skin_type === 'sensitive') ? 'selected' : '' %>>Da nhạy cảm</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="price_range">Mức giá</label>
-                        <select id="price_range" name="price_range" class="form-control">
-                            <option value="all" <%= (!article || article.price_range === 'all') ? 'selected' : '' %>>Mọi mức giá</option>
-                            <option value="budget" <%= (article && article.price_range === 'budget') ? 'selected' : '' %>>Bình dân (< 200k)</option>
-                            <option value="mid-range" <%= (article && article.price_range === 'mid-range') ? 'selected' : '' %>>Tầm trung (200k-500k)</option>
-                            <option value="luxury" <%= (article && article.price_range === 'luxury') ? 'selected' : '' %>>Cao cấp (> 500k)</option>
-                        </select>
-                    </div>
-                </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2rem;">
+                            <div class="form-group">
+                                <label for="category">Danh mục</label>
+                                <select id="category" name="category" class="form-control">
+                                    <option value="skincare" <%=(article && article.category==='skincare' ) ? 'selected'
+                                        : '' %>>Dưỡng Da</option>
+                                    <option value="makeup" <%=(article && article.category==='makeup' ) ? 'selected'
+                                        : '' %>>Trang Điểm</option>
+                                    <option value="bodycare" <%=(article && article.category==='bodycare' ) ? 'selected'
+                                        : '' %>>Cơ Thể</option>
+                                    <option value="haircare" <%=(article && article.category==='haircare' ) ? 'selected'
+                                        : '' %>>Tóc</option>
+                                    <option value="perfume" <%=(article && article.category==='perfume' ) ? 'selected'
+                                        : '' %>>Nước Hoa</option>
+                                    <option value="tools" <%=(article && article.category==='tools' ) ? 'selected' : ''
+                                        %>>Dụng Cụ</option>
+                                    <option value="supplements" <%=(article && article.category==='supplements' )
+                                        ? 'selected' : '' %>>Thực Phẩm</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="skin_type">Loại da</label>
+                                <select id="skin_type" name="skin_type" class="form-control">
+                                    <option value="all" <%=(!article || article.skin_type==='all' ) ? 'selected' : '' %>
+                                        >Mọi loại da</option>
+                                    <option value="oily" <%=(article && article.skin_type==='oily' ) ? 'selected' : ''
+                                        %>>Da dầu</option>
+                                    <option value="dry" <%=(article && article.skin_type==='dry' ) ? 'selected' : '' %>
+                                        >Da khô</option>
+                                    <option value="sensitive" <%=(article && article.skin_type==='sensitive' )
+                                        ? 'selected' : '' %>>Da nhạy cảm</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="price_range">Mức giá</label>
+                                <select id="price_range" name="price_range" class="form-control">
+                                    <option value="all" <%=(!article || article.price_range==='all' ) ? 'selected' : ''
+                                        %>>Mọi mức giá</option>
+                                    <option value="budget" <%=(article && article.price_range==='budget' ) ? 'selected'
+                                        : '' %>>Bình dân (< 200k)</option>
+                                    <option value="mid-range" <%=(article && article.price_range==='mid-range' )
+                                        ? 'selected' : '' %>>Tầm trung (200k-500k)</option>
+                                    <option value="luxury" <%=(article && article.price_range==='luxury' ) ? 'selected'
+                                        : '' %>>Cao cấp (> 500k)</option>
+                                </select>
+                            </div>
+                        </div>
 
-                <div class="form-group">
-                    <label for="excerpt">Tóm tắt ngắn (Xuất hiện ở trang chủ)</label>
-                    <textarea id="excerpt" name="excerpt" class="form-control" rows="3" style="resize: vertical;" placeholder="Viết một vài câu lôi cuốn người đọc..."><%= article ? article.excerpt || '' : '' %></textarea>
-                </div>
+                        <div class="form-group">
+                            <label for="excerpt">Tóm tắt ngắn (Xuất hiện ở trang chủ)</label>
+                            <textarea id="excerpt" name="excerpt" class="form-control" rows="3"
+                                style="resize: vertical;"
+                                placeholder="Viết một vài câu lôi cuốn người đọc..."><%= article ? article.excerpt || '' : '' %></textarea>
+                        </div>
 
-                <div class="form-group">
-                    <label>Nội dung review chi tiết <span style="color: #f43f5e;">*</span></label>
-                    <div id="editor"><%- article ? article.content : '' %></div>
-                    <input type="hidden" name="content" id="content">
-                </div>
+                        <div class="form-group">
+                            <label>Nội dung review chi tiết <span style="color: #f43f5e;">*</span></label>
+                            <div id="editor"><%- article ? article.content : '' %></div>
+                            <input type="hidden" name="content" id="content">
+                        </div>
 
-                <div class="form-group">
-                    <label for="affiliate_link">Liên kết mua hàng (Affiliate Link)</label>
-                    <input type="text" id="affiliate_link" name="affiliate_link" class="form-control" value="<%= article ? article.affiliate_link || '' : '' %>" placeholder="https://shope.ee/...">
-                </div>
+                        <div class="form-group">
+                            <label for="affiliate_link">Liên kết mua hàng (Affiliate Link)</label>
+                            <input type="text" id="affiliate_link" name="affiliate_link" class="form-control"
+                                value="<%= article ? article.affiliate_link || '' : '' %>"
+                                placeholder="https://shope.ee/...">
+                        </div>
 
-                <div class="form-group">
-                    <label for="status">Chế độ hiển thị</label>
-                    <select id="status" name="status" class="form-control">
-                        <option value="active" <%= (article && article.status === 'active') ? 'selected' : '' %>>✅ Công khai (Mọi người đều thấy)</option>
-                        <option value="inactive" <%= (article && article.status === 'inactive') ? 'selected' : '' %>>🔒 Lưu nháp (Chỉ quản trị viên thấy)</option>
-                    </select>
-                </div>
+                        <div class="form-group">
+                            <label for="status">Chế độ hiển thị</label>
+                            <select id="status" name="status" class="form-control">
+                                <option value="active" <%=(article && article.status==='active' ) ? 'selected' : '' %>>✅
+                                    Công khai (Mọi người đều thấy)</option>
+                                <option value="inactive" <%=(article && article.status==='inactive' ) ? 'selected' : ''
+                                    %>>🔒 Lưu nháp (Chỉ quản trị viên thấy)</option>
+                            </select>
+                        </div>
 
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">
-                        <i data-lucide="save"></i> <%= isEdit ? 'Cập nhật bài viết' : 'Xuất bản ngay' %>
-                    </button>
-                    <a href="/admin/dashboard" class="btn btn-secondary">Hủy và quay lại</a>
-                </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i data-lucide="save"></i>
+                                <%= isEdit ? 'Cập nhật bài viết' : 'Xuất bản ngay' %>
+                            </button>
+                            <a href="/admin/dashboard" class="btn btn-secondary">Hủy và quay lại</a>
+                        </div>
             </form>
         </div>
     </main>
@@ -403,9 +455,9 @@
                         [{ 'size': ['small', false, 'large', 'huge'] }],
                         ['bold', 'italic', 'underline', 'strike'],
                         [{ 'color': [] }, { 'background': [] }],
-                        [{ 'script': 'sub'}, { 'script': 'super' }],
+                        [{ 'script': 'sub' }, { 'script': 'super' }],
                         ['blockquote', 'code-block'],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }, { 'list': 'check' }, { 'indent': '-1'}, { 'indent': '+1' }],
+                        [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'list': 'check' }, { 'indent': '-1' }, { 'indent': '+1' }],
                         [{ 'direction': 'rtl' }, { 'align': [] }],
                         ['link', 'image', 'video'],
                         ['table'],
@@ -414,28 +466,28 @@
                         ['delete-row', 'delete-column', 'delete-table']
                     ],
                     handlers: {
-                        'table': function() {
+                        'table': function () {
                             this.quill.getModule('table').insertTable(3, 3);
                         },
-                        'insert-row-above': function() {
+                        'insert-row-above': function () {
                             this.quill.getModule('table').insertRowAbove();
                         },
-                        'insert-row-below': function() {
+                        'insert-row-below': function () {
                             this.quill.getModule('table').insertRowBelow();
                         },
-                        'insert-column-left': function() {
+                        'insert-column-left': function () {
                             this.quill.getModule('table').insertColumnLeft();
                         },
-                        'insert-column-right': function() {
+                        'insert-column-right': function () {
                             this.quill.getModule('table').insertColumnRight();
                         },
-                        'delete-row': function() {
+                        'delete-row': function () {
                             this.quill.getModule('table').deleteRow();
                         },
-                        'delete-column': function() {
+                        'delete-column': function () {
                             this.quill.getModule('table').deleteColumn();
                         },
-                        'delete-table': function() {
+                        'delete-table': function () {
                             this.quill.getModule('table').deleteTable();
                         }
                     }
@@ -458,15 +510,15 @@
             const btn = document.querySelector(`.ql-${key}`);
             if (btn) {
                 btn.title = customButtons[key];
-                if(key.includes('row')) btn.innerHTML = '<i data-lucide="rows-2" style="width:16px;height:16px;"></i>';
-                else if(key.includes('column')) btn.innerHTML = '<i data-lucide="columns-2" style="width:16px;height:16px;"></i>';
-                else if(key.includes('delete-table')) btn.innerHTML = '<i data-lucide="grid-2x2-x" style="width:16px;height:16px;color:#f43f5e;"></i>';
+                if (key.includes('row')) btn.innerHTML = '<i data-lucide="rows-2" style="width:16px;height:16px;"></i>';
+                else if (key.includes('column')) btn.innerHTML = '<i data-lucide="columns-2" style="width:16px;height:16px;"></i>';
+                else if (key.includes('delete-table')) btn.innerHTML = '<i data-lucide="grid-2x2-x" style="width:16px;height:16px;color:#f43f5e;"></i>';
                 else btn.innerHTML = '<i data-lucide="plus" style="width:14px;height:14px;"></i>';
             }
         });
         lucide.createIcons();
 
-        document.getElementById('edit-form').onsubmit = function() {
+        document.getElementById('edit-form').onsubmit = function () {
             // In Quill 2.0, root.innerHTML is still available
             document.getElementById('content').value = quill.root.innerHTML;
         };
@@ -491,4 +543,5 @@
         }
     </script>
 </body>
+
 </html>

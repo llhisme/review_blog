@@ -7,7 +7,14 @@
         <title>
                 <%= typeof title !=='undefined' ? title : 'PurePick - Review Mỹ phẩm Chuyên sâu' %>
         </title>
+        <!-- Core Styles -->
         <link rel="stylesheet" href="/css/style.css">
+        <!-- Post Specific Styles (Preloaded for SPA) -->
+        <link href="/css/post-detail.css" rel="stylesheet">
+        <!-- Quill 2.0 Rich Text Editor CSS (Preloaded for SPA) -->
+        <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+        <!-- Responsive Mobile Styles -->
+        <link rel="stylesheet" href="/css/mobile.css">
         <% if (typeof description !=='undefined' ) { %>
                 <meta name="description" content="<%= description %>">
                 <% } %>

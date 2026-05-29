@@ -456,60 +456,6 @@ body {
     font-weight: 800;
 }
 
-@media (max-width: 900px) {
-    .compact-filter-section {
-        margin-bottom: 1.5rem;
-        padding: 0.75rem 1rem;
-    }
-    .filter-label { display: none; }
-    
-    .mobile-filter-toggle {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        cursor: pointer;
-        font-weight: 700;
-        color: var(--text-color);
-        padding: 0.25rem 0;
-    }
-    
-    .toggle-icon.rotate {
-        transform: rotate(180deg);
-    }
-    
-    .filter-row {
-        display: none; /* Ẩn đi mặc định trên mobile/tablet */
-        flex-direction: column;
-        align-items: stretch;
-        margin-top: 1rem;
-        padding-top: 1rem;
-        border-top: 1px dashed rgba(0,0,0,0.1);
-        animation: fadeIn 0.3s ease;
-        gap: 0.75rem;
-    }
-    
-    .filter-row.show {
-        display: flex; /* Sử dụng flex column cho mượt mà, không bị lỗi padding của grid */
-    }
-
-    .filter-select.compact {
-        flex: 0 0 auto; /* Ngăn trình duyệt tự động kéo dài chiều cao ô chữ trên mobile */
-        width: 100%;
-        margin: 0; /* Đảm bảo không có margin thừa */
-    }
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@media (max-width: 480px) {
-    .filter-select.compact {
-        flex: 1 1 100%; /* Đảm bảo chiếm full màn hình trên mobile siêu nhỏ */
-    }
-}
-
 /* Article Cards Grid */
 .articles-grid {
     display: grid;
@@ -656,32 +602,6 @@ body {
     align-items: center;
 }
 
-/* Post Content Styles */
-.post-layout-container {
-    display: grid;
-    grid-template-columns: 280px 1fr;
-    gap: 4rem;
-    margin: 3rem 0;
-}
-
-.full-post {
-    background: var(--white);
-    padding: clamp(1.5rem, 5vw, 4.5rem);
-    border-radius: 24px;
-    max-width: 1000px;
-}
-
-.post-header h1 {
-    font-size: clamp(1.75rem, 5vw, 3rem);
-    font-weight: 800;
-    line-height: 1.2;
-}
-
-.post-content {
-    font-size: clamp(1rem, 2vw, 1.15rem);
-    line-height: 1.8;
-}
-
 /* CTA Buttons */
 .affiliate-btn {
     display: inline-flex;
@@ -708,25 +628,13 @@ body {
     color: white !important;
 }
 
-/* Verdict Box */
-.verdict-box {
-    background: #fdf2f8;
-    border-left: 5px solid #ec4899;
-    padding: 2rem;
-    border-radius: 0 20px 20px 0;
-    margin: 3rem 0;
-}
-
 /* RESPONSIVE BREAKPOINTS */
 @media (max-width: 1200px) {
-    .post-layout-container { gap: 2rem; }
     .featured-card { gap: 2rem; }
 }
 
 @media (max-width: 1024px) {
     .featured-card { grid-template-columns: 1fr; }
-    .post-layout-container { grid-template-columns: 1fr; }
-    .post-sidebar { display: none; }
 }
 
 @media (max-width: 768px) {

@@ -1,0 +1,191 @@
+/* 
+   PurePick - Dedicated Mobile Styles
+   This file contains all responsive rules for screens under 900px.
+*/
+
+@media (max-width: 900px) {
+    /* Header & Navigation */
+    .site-header .navbar { 
+        flex-direction: row; 
+        justify-content: space-between; 
+    }
+    
+    .nav-menu { 
+        display: none; 
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: white;
+        flex-direction: column;
+        gap: 0;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        z-index: 1000;
+    }
+    
+    .nav-menu.active { 
+        display: flex; 
+    }
+    
+    .nav-menu a {
+        display: block;
+        padding: 1.25rem 2rem;
+        width: 100%;
+        border-bottom: 1px solid #f8fafc;
+        color: #1f2937;
+    }
+    
+    .mobile-menu-btn { 
+        display: block; 
+    }
+
+    /* Filter Section */
+    .compact-filter-section {
+        margin-bottom: 1.5rem;
+        padding: 0.75rem 1rem;
+        top: 80px;
+    }
+    
+    .filter-label { 
+        display: none; 
+    }
+    
+    .mobile-filter-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        font-weight: 700;
+        color: #1f2937;
+        padding: 0.25rem 0;
+    }
+    
+    .filter-row {
+        display: none; 
+        flex-direction: column !important;
+        gap: 1rem !important;
+        align-items: stretch !important;
+        margin-top: 1.5rem !important;
+        padding-top: 1rem !important;
+        border-top: 1px dashed rgba(0,0,0,0.1) !important;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    .filter-row.show {
+        display: flex !important;
+    }
+
+    .filter-search-container,
+    .custom-select-wrapper {
+        flex: none !important;
+        width: 100% !important;
+        min-width: 100% !important;
+    }
+    
+    .filter-input-unified {
+        height: 52px !important;
+        width: 100% !important;
+    }
+
+    /* Article Grid & Cards */
+    .articles-grid { 
+        grid-template-columns: 1fr; 
+        gap: 1.5rem;
+    }
+    
+    .hero { 
+        padding: 4rem 1rem; 
+    }
+
+    /* Visibility Toggles */
+    .desktop-only {
+        display: none !important;
+    }
+    
+    .mobile-only {
+        display: block !important;
+    }
+    .about-cta-btn {
+        padding: 0.8rem 1.5rem !important;
+        font-size: 0.95rem !important;
+        white-space: nowrap;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Post Detail Specifics */
+    .post-layout-container { 
+        grid-template-columns: 1fr; 
+    }
+    
+    .post-sidebar { 
+        display: none; 
+    }
+    
+    .full-post { 
+        padding: 2rem; 
+    }
+    
+    .post-header { 
+        margin-bottom: 2.5rem; 
+    }
+    
+    .post-meta { 
+        flex-direction: column; 
+        gap: 0.75rem; 
+    }
+    
+    .affiliate-box { 
+        flex-direction: column; 
+        text-align: center; 
+        gap: 1.5rem; 
+        padding: 2rem; 
+    }
+    
+    .post-footer { 
+        flex-direction: column; 
+        gap: 2rem; 
+        align-items: stretch; 
+    }
+    
+    .share-btn { 
+        text-align: center; 
+    }
+    
+    .back-link { 
+        order: 2; 
+        text-align: center; 
+    }
+    
+    .back-link a { 
+        justify-content: center; 
+    }
+
+    /* Comparison Articles */
+    .comparison-grid {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+    }
+    
+    .comparison-table th {
+        width: 40%;
+        font-size: 0.85rem;
+    }
+    
+    .comparison-table td {
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .site-header .navbar { 
+        flex-direction: row; 
+    }
+}
+
+/* Animations for Mobile */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
