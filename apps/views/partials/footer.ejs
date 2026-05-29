@@ -58,29 +58,31 @@
             <p style="margin-top: 1.5rem;">&copy; 2024 PurePick. Tất cả bản quyền được bảo lưu.</p>
         </div>
     </div>
+    <!-- Nút quay lại đầu trang nằm trong footer hx-preserve để không bị mất khi chuyển trang -->
+    <button id="back-to-top" title="Quay lại đầu trang">
+        <i data-lucide="arrow-up"></i>
+    </button>
 </footer>
-
-<button id="back-to-top" title="Quay lại đầu trang">
-    <i data-lucide="arrow-up"></i>
-</button>
 
 <script>
     function initFooter() {
         // Initialize Lucide icons
-        lucide.createIcons();
-
-        // Re-initialize back to top button click listener
-        const backToTopBtn = document.getElementById('back-to-top');
-        if (backToTopBtn) {
-            const newBtn = backToTopBtn.cloneNode(true);
-            backToTopBtn.parentNode.replaceChild(newBtn, backToTopBtn);
-            newBtn.addEventListener('click', () => {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            });
-        }
+        if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
-    // Scroll event listener for window only needs to be attached once
+    // SỬ DỤNG EVENT DELEGATION: Gán sự kiện click cho document
+    // Cách này giúp nút hoạt động vĩnh viễn, kể cả khi dùng nút Back của trình duyệt
+    if (!window.backToTopAttached) {
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('#back-to-top');
+            if (btn) {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+        window.backToTopAttached = true;
+    }
+
+    // Scroll event listener (luôn tồn tại trên window)
     if (!window.scrollListenerAttached) {
         window.addEventListener('scroll', () => {
             const btn = document.getElementById('back-to-top');
@@ -97,6 +99,8 @@
 
     document.addEventListener('DOMContentLoaded', initFooter);
     document.addEventListener('htmx:afterSettle', initFooter);
+    // Đảm bảo icon hiển thị đúng sau khi khôi phục lịch sử
+    document.addEventListener('htmx:historyRestore', initFooter);
 </script>
 </body>
 </html>
