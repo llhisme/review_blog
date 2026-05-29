@@ -68,6 +68,13 @@
                     }
                 });
 
+                // CHỐNG LAG SCROLL: Cuộn lên đầu trang ngay sau khi DOM thay đổi, trước khi browser chụp ảnh mới
+                document.addEventListener('htmx:afterSwap', function(evt) {
+                    if (evt.detail.target === document.body) {
+                        window.scrollTo(0, 0);
+                    }
+                });
+
                 // Mobile menu toggle logic
                 function initMobileMenu() {
                         const menuBtn = document.getElementById('mobile-menu-btn');

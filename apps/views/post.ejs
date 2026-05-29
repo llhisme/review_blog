@@ -84,9 +84,11 @@
                             <div class="no-thumb"><i data-lucide="image-off"></i></div>
                         <% } %>
                     </a>
+                    <div class="article-excerpt desktop-only"><%= rel.excerpt || (rel.content ? rel.content.replace(/<[^>]*>?/gm, '').substring(0, 120) + '...' : '') %></div>
                 </div>
                 <div class="article-card-content">
                     <h2 style="font-size: 1.1rem;"><a href="/post/<%= rel.slug %>"><%= rel.title %></a></h2>
+                    <p class="article-excerpt-mobile mobile-only"><%= rel.excerpt || (rel.content ? rel.content.replace(/<[^>]*>?/gm, '').substring(0, 120) + '...' : '') %></p>
                     <div class="article-meta">
                         <span class="article-date">
                             <i data-lucide="tag" size="14"></i>

@@ -93,6 +93,10 @@
         grid-template-columns: 1fr; 
         gap: 1.5rem;
     }
+
+    .article-thumb {
+        aspect-ratio: 16 / 10; /* Chuyển từ ảnh dọc (4/5) sang ảnh ngang (16/10) trên mobile */
+    }
     
     .hero { 
         padding: 4rem 1rem; 
