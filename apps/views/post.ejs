@@ -1,4 +1,6 @@
 <%- include('partials/header') %>
+<!-- Quill 2.0 Rich Text Editor CSS (scoped for rendering) -->
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
 
 <div class="container">
     <div class="post-layout-container">
@@ -32,12 +34,12 @@
                 </div>
             </header>
 
-            <div class="post-content" id="article-content">
+            <div class="post-content ql-snow" id="article-content" data-article-id="<%= article.id %>">
                 <%- article.content %>
             </div>
 
             <% if (article.affiliate_link) { %>
-            <div class="affiliate-box">
+            <div class="affiliate-box" data-article-id="<%= article.id %>">
                 <div class="affiliate-icon">
                     <i data-lucide="shopping-cart"></i>
                 </div>
@@ -169,6 +171,43 @@
 
     document.addEventListener('DOMContentLoaded', initToc);
     document.addEventListener('htmx:afterSettle', initToc);
+</script>
+
+<script>
+    // Hệ thống theo dõi Click Affiliate chuyên sâu (Bulletproof)
+    document.addEventListener('DOMContentLoaded', () => {
+        const articleId = '<%= article.id %>';
+        
+        const trackClick = (e) => {
+            const link = e.target.closest('a');
+            if (!link) return;
+
+            const href = link.getAttribute('href') || '';
+            const isAffiliateLink = 
+                link.classList.contains('affiliate-btn') || 
+                link.classList.contains('btn-compare-aff') ||
+                href.includes('shope.ee') || 
+                href.includes('tiki.vn') || 
+                href.includes('lazada.vn') ||
+                href.includes('shopee.vn');
+
+            if (isAffiliateLink) {
+                // Sử dụng Beacon API để đảm bảo request được gửi thành công 100% khi chuyển trang
+                const trackingUrl = `/api/track-click/${articleId}`;
+                
+                if (navigator.sendBeacon) {
+                    navigator.sendBeacon(trackingUrl);
+                } else {
+                    // Fallback cho trình duyệt cũ
+                    fetch(trackingUrl, { method: 'POST', keepalive: true });
+                }
+                console.log('Affiliate tracking activated for ID:', articleId);
+            }
+        };
+
+        // Lắng nghe trên toàn bộ trang để không bỏ sót bất kỳ link nào
+        document.body.addEventListener('click', trackClick);
+    });
 </script>
 
 <%- include('partials/footer') %>

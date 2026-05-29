@@ -1,27 +1,187 @@
 <%- include('partials/header') %>
 
-<div class="container">
-    <article class="full-post" style="margin-top: 3rem;">
-        <header class="post-header" style="text-align: center;">
-            <h1 style="font-size: 3rem;">Về PurePick</h1>
-            <p style="color: var(--text-muted); font-size: 1.2rem; font-weight: 500;">Sứ mệnh mang đến những đánh giá mỹ phẩm chân thực nhất</p>
-        </header>
+<style>
+    .about-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 6rem 1rem 8rem;
+    }
 
-        <div class="post-content">
-            <p>Chào mừng các nàng đã ghé thăm <strong>PurePick</strong>! ✨</p>
+    .about-hero {
+        text-align: center;
+        margin-bottom: 5rem;
+    }
 
-            <p>PurePick ra đời với mong muốn trở thành người bạn đồng hành tin cậy trên hành trình chăm sóc sắc đẹp của mỗi phụ nữ Việt. Giữa thị trường mỹ phẩm bạt ngàn với vô vàn quảng cáo hoa mỹ, chúng mình hiểu rằng việc tìm ra một sản phẩm thực sự phù hợp với "đặc điểm riêng" của làn da và túi tiền là điều không hề dễ dàng.</p>
+    .about-hero h1 {
+        font-size: clamp(2.2rem, 8vw, 4rem);
+        font-weight: 800;
+        margin-top: 1.5rem;
+        margin-bottom: 2rem;
+        letter-spacing: -0.04em;
+        line-height: 1.1;
+    }
 
-            <h2>Tại sao các nàng nên tin tưởng PurePick?</h2>
-            <ul>
-                    <li>✅ <strong>Khách quan & Trung thực:</strong> Mọi bài viết đều dựa trên trải nghiệm thực tế và phân tích thành phần khoa học.</li>
-                    <li>✅ <strong>Cá nhân hóa:</strong> Công cụ tìm kiếm thông minh giúp bạn lọc sản phẩm theo đúng loại da (dầu, khô, nhạy cảm).</li>
-                    <li>✅ <strong>Cập nhật liên tục:</strong> Đội ngũ chúng mình luôn theo sát các xu hướng làm đẹp mới nhất để cung cấp thông tin kịp thời.</li>
-            </ul>
+    .about-hero p {
+        font-size: clamp(1.1rem, 4vw, 1.25rem);
+        color: var(--text-muted);
+        line-height: 1.8;
+        max-width: 750px;
+        margin: 0 auto;
+    }
 
-            <h2>Về các Liên kết Tiếp thị (Affiliate)</h2>
-            <p>Để duy trì và phát triển cộng đồng PurePick, một số liên kết trong các bài viết có thể là liên kết tiếp thị. Khi bạn mua hàng qua các link này, chúng mình sẽ nhận được một khoản hoa hồng nhỏ mà bạn **không phải trả thêm bất kỳ chi phí nào**.</p>
-            <p>Sự ủng hộ của bạn là động lực rất lớn để PurePick tiếp tục tạo ra những nội dung chất lượng và chuyên sâu hơn. Cảm ơn các nàng rất nhiều! ❤️</p>
+    .about-banner {
+        width: 100%;
+        aspect-ratio: 21/9;
+        border-radius: 24px;
+        overflow: hidden;
+        margin-bottom: 6rem;
+        box-shadow: 0 30px 60px -15px rgba(0,0,0,0.15);
+    }
+
+    .about-banner img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .about-quote {
+        font-size: clamp(1.3rem, 5vw, 1.6rem);
+        font-weight: 600;
+        color: var(--text-color);
+        line-height: 1.7;
+        margin-bottom: 5rem;
+        font-style: italic;
+        border-left: 6px solid #e11d48;
+        padding: 0.5rem 0 0.5rem 2.5rem;
+        border-radius: 2px;
+        background: rgba(225, 29, 72, 0.03);
+    }
+
+    .about-section-title {
+        font-size: clamp(1.8rem, 6vw, 2.2rem);
+        margin-bottom: 1.5rem;
+        font-weight: 800;
+    }
+
+    .values-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 2.5rem;
+        margin: 4rem 0 6rem;
+    }
+
+    .value-card {
+        padding: 3rem;
+        border-radius: 24px;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid transparent;
+    }
+
+    .value-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+    }
+
+    .about-footer-cta {
+        margin-top: 6rem;
+        text-align: center;
+        background: linear-gradient(145deg, #fff1f2 0%, #ffffff 100%);
+        padding: 5rem 2rem;
+        border-radius: 32px;
+        border: 1px solid #ffe4e6;
+    }
+
+    /* Mobile Specific Overrides */
+    @media (max-width: 768px) {
+        .about-container {
+            padding: 3rem 1.25rem 6rem;
+        }
+
+        .about-hero {
+            margin-bottom: 3.5rem;
+        }
+
+        .about-banner {
+            aspect-ratio: 16/10; /* Cao hơn trên mobile để thấy rõ ảnh */
+            margin-bottom: 4rem;
+        }
+
+        .about-quote {
+            padding-left: 1.5rem;
+            margin-bottom: 3.5rem;
+        }
+
+        .values-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .value-card {
+            padding: 2rem;
+        }
+
+        .about-footer-cta {
+            padding: 3.5rem 1.5rem;
+            margin-top: 4rem;
+        }
+
+        .about-footer-cta h3 {
+            font-size: 1.6rem;
+        }
+    }
+</style>
+
+<div class="about-container">
+    <div class="about-hero">
+        <span style="color: #e11d48; font-weight: 800; text-transform: uppercase; letter-spacing: 0.15em; font-size: 0.85rem;">Câu chuyện của chúng mình</span>
+        <h1>Vẻ Đẹp Đích Thực Bắt Đầu Từ <br><span style="color: #e11d48;">Sự Thật</span></h1>
+        <p>Chúng mình không chỉ review mỹ phẩm, chúng mình kể về hành trình tìm lại sự tự tin của mỗi phụ nữ thông qua những lựa chọn thông thái nhất.</p>
+    </div>
+
+    <!-- Hình ảnh Banner -->
+    <div class="about-banner">
+        <img src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&q=80&w=1200" alt="PurePick Team">
+    </div>
+
+    <article class="post-content">
+        <div class="about-quote">
+            "Tại PurePick, chúng mình tin rằng không có làn da xấu, chỉ có làn da chưa tìm đúng 'người bạn đời' mỹ phẩm của mình."
+        </div>
+
+        <h2 class="about-section-title">Hành trình ra đời</h2>
+        <p>PurePick ra đời từ những ngày tháng loay hoay trong "mê hồn trận" mỹ phẩm. Chúng mình hiểu cảm giác bỏ ra hàng triệu đồng nhưng nhận về một sản phẩm gây kích ứng hoặc không hiệu quả chỉ vì tin vào những lời quảng cáo hào nhoáng.</p>
+        <p>Đó là lý do chúng mình xây dựng một không gian nơi <strong>Sự Thật</strong> là ưu tiên số một. Mỗi bài viết tại PurePick là kết quả của hàng chục giờ nghiên cứu bảng thành phần và trải nghiệm thực tế đầy tâm huyết.</p>
+
+        <!-- Giá trị cốt lõi Grid -->
+        <div class="values-grid">
+            <div class="value-card" style="background: #fff1f2; border-color: #fecdd3;">
+                <i data-lucide="microscope" size="36" style="color: #e11d48; margin-bottom: 1.5rem;"></i>
+                <h3 style="margin-top: 0; font-size: 1.4rem; color: #be185d; margin-bottom: 1rem;">100% Khách quan</h3>
+                <p style="font-size: 1rem; color: #881337; margin-bottom: 0;">Mọi sản phẩm đều được test trên da thật và phân tích thành phần kỹ lưỡng trước khi lên bài review.</p>
+            </div>
+            
+            <div class="value-card" style="background: #f8fafc; border-color: #e2e8f0;">
+                <i data-lucide="heart-handshake" size="36" style="color: var(--primary-color); margin-bottom: 1.5rem;"></i>
+                <h3 style="margin-top: 0; font-size: 1.4rem; margin-bottom: 1rem;">Vì cộng đồng</h3>
+                <p style="font-size: 1rem; color: var(--text-muted); margin-bottom: 0;">Mỗi cú click của bạn đều góp phần giúp PurePick duy trì đội ngũ nghiên cứu và săn các deal tốt nhất.</p>
+            </div>
+        </div>
+
+        <h2 class="about-section-title">Về Liên kết Tiếp thị</h2>
+        <p>Để duy trì hoạt động của trang web và có kinh phí mua các sản phẩm mới nhất về trải nghiệm, một số liên kết trong các bài viết của chúng mình là liên kết tiếp thị. Khi nàng mua hàng qua những link này, PurePick sẽ nhận được một khoản hoa hồng rất nhỏ từ sàn thương mại điện tử.</p>
+        <p>Nàng hãy hoàn toàn yên tâm rằng: <strong>Chi phí mua hàng của nàng KHÔNG hề thay đổi</strong>. Hơn thế nữa, danh dự và lòng tin của độc giả luôn là ưu tiên số một. Chúng mình tuyệt đối sẽ không tâng bốc một sản phẩm kém chất lượng chỉ vì tiền hoa hồng.</p>
+
+        <div class="about-footer-cta">
+            <h3 style="display: flex; align-items: center; justify-content: center; gap: 0.75rem; font-size: 2rem; margin-bottom: 1.5rem;">
+                <i data-lucide="smile" style="color: #e11d48;"></i> Cùng nhau đẹp hơn mỗi ngày
+            </h3>
+            <p style="font-size: 1.1rem; color: #881337; margin-bottom: 3rem;">Cảm ơn nàng đã tin tưởng và đồng hành cùng PurePick. Hãy để chúng mình chăm sóc làn da của nàng nhé!</p>
+            <div style="display: flex; justify-content: center;">
+                <a href="/" class="affiliate-btn" style="text-transform: none; padding: 1.2rem 3rem; font-size: 1.1rem;">
+                    <i data-lucide="book-open"></i>
+                    <span>Khám phá các bài Review</span>
+                </a>
+            </div>
         </div>
     </article>
 </div>

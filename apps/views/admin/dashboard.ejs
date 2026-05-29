@@ -1,3 +1,4 @@
+<% if (!onlyContent) { %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -6,6 +7,7 @@
     <title><%= title %> - Admin Panel</title>
     <link rel="stylesheet" href="/css/style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <style>
         :root {
             --admin-sidebar-width: 280px;
@@ -40,8 +42,7 @@
             font-weight: 800;
             color: var(--primary-light);
             display: flex;
-            align-items: center;
-            gap: 0.75rem;
+            align-items: center; gap: 0.75rem;
         }
 
         .sidebar-menu {
@@ -328,6 +329,37 @@
         @media (max-width: 1024px) {
             .admin-toggle-btn { display: flex; }
         }
+
+        .btn-page {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            color: var(--text-color);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-page:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-page.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+        }
+
+        @media (max-width: 640px) {
+            .hide-mobile { display: none !important; }
+        }
     </style>
 </head>
 <body class="admin-body">
@@ -362,6 +394,29 @@
                 </button>
                 <h2>Hệ thống quản lý PurePick</h2>
             </div>
+            
+            <!-- Bộ lọc thời gian -->
+            <div style="display: flex; align-items: center; gap: 1rem; background: white; padding: 0.5rem 1rem; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: var(--shadow-sm);">
+                <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;"><i data-lucide="calendar" size="14" style="vertical-align: middle;"></i> Thời gian:</span>
+                <input type="date" 
+                       id="stat-date-picker" 
+                       value="<%= selectedDate %>" 
+                       style="border: none; outline: none; font-family: inherit; font-weight: 600; color: var(--primary-color); cursor: pointer;"
+                       hx-get="/admin/dashboard"
+                       hx-trigger="change"
+                       hx-target="#dashboard-content"
+                       hx-select="#dashboard-content"
+                       name="date">
+                <div style="width: 1px; height: 20px; background: #e2e8f0;"></div>
+                <button hx-get="/admin/dashboard" 
+                        hx-target="#dashboard-content" 
+                        hx-select="#dashboard-content"
+                        class="btn-all-time"
+                        style="background: none; border: none; font-size: 0.85rem; font-weight: 700; color: <%= !selectedDate ? '#e11d48' : 'var(--text-muted)' %>; cursor: pointer; transition: color 0.2s;">
+                    Tất cả thời gian
+                </button>
+            </div>
+
             <div class="user-info" style="display: flex; align-items: center; gap: 1rem;">
                 <div style="text-align: right;" class="hide-mobile">
                     <div style="font-weight: 700; color: var(--text-color);">Quản trị viên</div>
@@ -372,105 +427,235 @@
                 </div>
             </div>
         </div>
+<% } %>
 
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon"><i data-lucide="book-open"></i></div>
-                <div class="stat-info">
-                    <h3>Tổng bài viết</h3>
-                    <p><%= totalArticles %></p>
+        <!-- Vùng chứa nội dung động (Sẽ được HTMX cập nhật) -->
+        <div id="dashboard-content">
+            <div style="margin-bottom: 1.5rem;">
+                <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-color); display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="line-chart" style="color: #e11d48;"></i>
+                    Thống kê hiệu quả <%= selectedDate ? 'ngày ' + new Date(selectedDate).toLocaleDateString('vi-VN') : 'tất cả các ngày' %>
+                </h3>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(99, 102, 241, 0.1); color: var(--primary-color);">
+                        <i data-lucide="book-open"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Tổng bài viết</h3>
+                        <p><%= totalArticles %></p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--secondary-color);">
+                        <i data-lucide="eye"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Lượt xem</h3>
+                        <p><%= stats.totalViews.toLocaleString() %></p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(236, 72, 153, 0.1); color: #ec4899;">
+                        <i data-lucide="mouse-pointer-click"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Lượt Click Link</h3>
+                        <p><%= stats.totalClicks.toLocaleString() %></p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+                        <i data-lucide="trending-up"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Tỉ lệ CTR</h3>
+                        <p><%= stats.totalViews > 0 ? ((stats.totalClicks / stats.totalViews) * 100).toFixed(1) : 0 %>%</p>
+                    </div>
                 </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon"><i data-lucide="zap"></i></div>
-                <div class="stat-info">
-                    <h3>Trạng thái hệ thống</h3>
-                    <p><span class="badge badge-success">Ổn định</span></p>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem; margin-bottom: 3rem;">
+                <div class="admin-card" style="margin-bottom: 0; padding: 2rem;">
+                    <h3 style="font-size: 1.2rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i data-lucide="bar-chart-2" style="color: var(--primary-color);"></i> Top Xem Nhiều <%= selectedDate ? '(Trong ngày)' : '(Tổng)' %>
+                    </h3>
+                    <ul style="list-style: none;">
+                        <% if (stats.topViewed.length > 0) { %>
+                            <% stats.topViewed.forEach((post, index) => { %>
+                            <li style="padding: 1rem 0; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 0.75rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 280px;">
+                                    <span style="color: var(--text-muted); font-family: monospace;"><%= index + 1 %>.</span> 
+                                    <%= post.title %>
+                                </span>
+                                <span style="background: #f8fafc; padding: 4px 10px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; color: var(--primary-color);">
+                                    <%= post.views.toLocaleString() %> <span style="font-weight: 500; font-size: 0.75rem;">view</span>
+                                </span>
+                            </li>
+                            <% }) %>
+                        <% } else { %>
+                            <p style="text-align: center; color: var(--text-muted); padding: 2rem;">Không có dữ liệu cho ngày này.</p>
+                        <% } %>
+                    </ul>
+                </div>
+
+                <div class="admin-card" style="margin-bottom: 0; padding: 2rem;">
+                    <h3 style="font-size: 1.2rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i data-lucide="shopping-bag" style="color: #ec4899;"></i> Hiệu quả nhất <%= selectedDate ? '(Trong ngày)' : '(Tổng)' %>
+                    </h3>
+                    <ul style="list-style: none;">
+                        <% if (stats.topClicked.length > 0) { %>
+                            <% stats.topClicked.forEach((post, index) => { %>
+                            <li style="padding: 1rem 0; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 0.75rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 280px;">
+                                    <span style="color: var(--text-muted); font-family: monospace;"><%= index + 1 %>.</span> 
+                                    <%= post.title %>
+                                </span>
+                                <span style="background: #fff1f2; padding: 4px 10px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; color: #e11d48;">
+                                    <%= post.affiliate_clicks.toLocaleString() %> <span style="font-weight: 500; font-size: 0.75rem;">click</span>
+                                </span>
+                            </li>
+                            <% }) %>
+                        <% } else { %>
+                            <p style="text-align: center; color: var(--text-muted); padding: 2rem;">Không có dữ liệu cho ngày này.</p>
+                        <% } %>
+                    </ul>
                 </div>
             </div>
-        </div>
 
-        <% if (success) { %>
-            <div class="alert alert-success">
-                <i data-lucide="check-circle"></i> 
-                <%= success === 'created' ? 'Đã tạo bài viết thành công!' : 
-                    success === 'updated' ? 'Đã cập nhật bài viết thành công!' : 
-                    'Đã xóa bài viết thành công!' %>
-            </div>
-        <% } %>
+            <% if (typeof success !== 'undefined' && success) { %>
+                <div class="alert alert-success">
+                    <i data-lucide="check-circle"></i> 
+                    <%= success === 'created' ? 'Đã tạo bài viết thành công!' : 
+                        success === 'updated' ? 'Đã cập nhật bài viết thành công!' : 
+                        'Đã xóa bài viết thành công!' %>
+                </div>
+            <% } %>
 
-        <div class="admin-card" style="overflow-x: auto;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2.5rem;">
-                <h3 style="font-size: 1.4rem; font-weight: 800;">Danh sách bài viết</h3>
-                <a href="/admin/new" class="btn btn-primary">
-                    <i data-lucide="plus"></i> <span class="hide-mobile">Viết bài mới</span>
-                </a>
-            </div>
-            
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th class="hide-mobile">Ảnh</th>
-                        <th>Tiêu đề bài viết</th>
-                        <th>Trạng thái</th>
-                        <th class="hide-mobile">Ngày đăng</th>
-                        <th>Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% if (articles.length > 0) { %>
-                        <% articles.forEach(function(article) { %>
-                            <tr>
-                                <td class="hide-mobile">
-                                    <% if (article.thumbnail) { %>
-                                        <img src="<%= article.thumbnail %>" alt="" class="thumb-preview">
-                                    <% } else { %>
-                                        <div class="thumb-preview" style="background:#f3f4f6; display:flex; align-items:center; justify-content:center; color:var(--text-muted);">
-                                            <i data-lucide="image" size="20"></i>
+            <div class="admin-card" style="overflow-x: auto;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2.5rem;">
+                    <h3 style="font-size: 1.4rem; font-weight: 800;">Danh sách bài viết</h3>
+                    <a href="/admin/new" class="btn btn-primary">
+                        <i data-lucide="plus"></i> <span class="hide-mobile">Viết bài mới</span>
+                    </a>
+                </div>
+                
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th class="hide-mobile" style="width: 80px;">Ảnh</th>
+                            <th style="min-width: 210px;">Tiêu đề bài viết</th>
+                            <th style="width: 160px; white-space: nowrap;">Thống kê bài viết</th>
+                            <th style="width: 130px;">Trạng thái</th>
+                            <th class="hide-mobile" style="width: 160px;">Ngày đăng</th>
+                            <th style="width: 140px;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (articles.length > 0) { %>
+                            <% articles.forEach(function(article) { %>
+                                <tr>
+                                    <td class="hide-mobile">
+                                        <% if (article.thumbnail) { %>
+                                            <img src="<%= article.thumbnail %>" alt="" class="thumb-preview">
+                                        <% } else { %>
+                                            <div class="thumb-preview" style="background:#f3f4f6; display:flex; align-items:center; justify-content:center; color:var(--text-muted);">
+                                                <i data-lucide="image" size="20"></i>
+                                            </div>
+                                        <% } %>
+                                    </td>
+                                    <td style="vertical-align: middle;">
+                                        <div style="font-weight: 700; color: var(--text-color); margin-bottom: 0.25rem; line-height: 1.4;"><%= article.title %></div>
+                                        <div style="font-size: 0.8rem; color: var(--text-muted); font-family: monospace;"><%= article.slug %></div>
+                                    </td>
+                                    <td style="vertical-align: middle; white-space: nowrap;">
+                                        <div style="font-size: 0.85rem; font-weight: 600; color: var(--primary-color); display: flex; align-items: center; gap: 0.4rem;">
+                                            <i data-lucide="eye" size="14"></i> <%= article.views.toLocaleString() %> <span style="font-weight: 400; opacity: 0.7;">xem</span>
                                         </div>
-                                    <% } %>
-                                </td>
-                                <td>
-                                    <div style="font-weight: 700; color: var(--text-color); margin-bottom: 0.25rem;"><%= article.title %></div>
-                                    <div style="font-size: 0.85rem; color: var(--text-muted);"><%= article.slug %></div>
-                                </td>
-                                <td>
-                                    <% if (article.status === 'active') { %>
-                                        <span class="badge badge-success">Hoạt động</span>
-                                    <% } else { %>
-                                        <span class="badge" style="background: #f3f4f6; color: var(--text-muted);">Đang ẩn</span>
-                                    <% } %>
-                                </td>
-                                <td style="font-weight: 600; color: var(--text-muted);" class="hide-mobile"><%= new Date(article.created_at).toLocaleDateString('vi-VN') %></td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <a href="/post/<%= article.slug %>" target="_blank" class="btn-action btn-view" title="Xem bài viết"><i data-lucide="eye" size="18"></i></a>
-                                        <a href="/admin/edit/<%= article.id %>" class="btn-action btn-edit" title="Sửa bài viết"><i data-lucide="edit-3" size="18"></i></a>
-                                        <form action="/admin/delete/<%= article.id %>" method="POST" style="display: inline;" onsubmit="return confirm('Bạn có chắc muốn xóa bài viết này?')">
-                                            <button type="submit" class="btn-action btn-delete" title="Xóa bài viết"><i data-lucide="trash-2" size="18"></i></button>
-                                        </form>
-                                    </div>
+                                        <div style="font-size: 0.85rem; font-weight: 600; color: #ec4899; display: flex; align-items: center; gap: 0.4rem; margin-top: 0.25rem;">
+                                            <i data-lucide="mouse-pointer-click" size="14"></i> <%= article.affiliate_clicks.toLocaleString() %> <span style="font-weight: 400; opacity: 0.7;">click</span>
+                                        </div>
+                                    </td>
+                                    <td style="vertical-align: middle; white-space: nowrap;">
+                                        <button class="badge <%= article.status === 'active' ? 'badge-success' : '' %>" 
+                                                style="<%= article.status !== 'active' ? 'background: #f3f4f6; color: var(--text-muted);' : '' %> white-space: nowrap; border: none; cursor: pointer; display: block; width: 100%; text-align: center;"
+                                                hx-post="/admin/toggle-status/<%= article.id %>"
+                                                hx-target="#dashboard-content"
+                                                hx-select="#dashboard-content"
+                                                hx-swap="outerHTML"
+                                                hx-push-url="false"
+                                                title="Nhấn để đổi trạng thái">
+                                            <% if (article.status === 'active') { %>
+                                                <i data-lucide="check" size="12" style="vertical-align: middle;"></i> Hoạt động
+                                            <% } else { %>
+                                                <i data-lucide="eye-off" size="12" style="vertical-align: middle;"></i> Đang ẩn
+                                            <% } %>
+                                        </button>
+                                    </td>
+                                    <td style="font-weight: 600; color: var(--text-muted);" class="hide-mobile"><%= new Date(article.created_at).toLocaleDateString('vi-VN') %></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <a href="/post/<%= article.slug %>" target="_blank" class="btn-action btn-view" title="Xem bài viết"><i data-lucide="eye" size="18"></i></a>
+                                            <a href="/admin/edit/<%= article.id %>" class="btn-action btn-edit" title="Sửa bài viết"><i data-lucide="edit-3" size="18"></i></a>
+                                            <form action="/admin/delete/<%= article.id %>" method="POST" style="display: inline;" onsubmit="return confirm('Bạn có chắc muốn xóa bài viết này?')">
+                                                <button type="submit" class="btn-action btn-delete" title="Xóa bài viết"><i data-lucide="trash-2" size="18"></i></button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 4rem; color: var(--text-muted);">
+                                    <i data-lucide="inbox" size="40" style="margin-bottom: 1rem; opacity: 0.5;"></i>
+                                    <p>Chưa có bài viết nào ở trang này.</p>
                                 </td>
                             </tr>
-                        <% }); %>
-                    <% } else { %>
-                        <tr>
-                            <td colspan="5" style="text-align: center; padding: 4rem; color: var(--text-muted);">
-                                <i data-lucide="inbox" size="40" style="margin-bottom: 1rem; opacity: 0.5;"></i>
-                                <p>Chưa có bài viết nào. Hãy bắt đầu tạo nội dung mới!</p>
-                            </td>
-                        </tr>
-                    <% } %>
-                </tbody>
-            </table>
-        </div>
-    </main>
+                        <% } %>
+                    </tbody>
+                </table>
 
-    <style>
-        @media (max-width: 640px) {
-            .hide-mobile { display: none !important; }
-        }
-    </style>
+                <!-- Phân trang -->
+                <% if (totalPages > 1) { %>
+                <div style="margin-top: 2.5rem; display: flex; justify-content: center; gap: 0.5rem;" class="pagination">
+                    <% if (page > 1) { %>
+                        <button class="btn-page" 
+                                hx-get="/admin/dashboard?page=<%= page - 1 %>" 
+                                hx-target="#dashboard-content" 
+                                hx-select="#dashboard-content"
+                                hx-swap="outerHTML">
+                            <i data-lucide="chevron-left" size="18"></i>
+                        </button>
+                    <% } %>
+
+                    <% for(let i = 1; i <= totalPages; i++) { %>
+                        <button class="btn-page <%= i === page ? 'active' : '' %>"
+                                hx-get="/admin/dashboard?page=<%= i %>" 
+                                hx-target="#dashboard-content" 
+                                hx-select="#dashboard-content"
+                                hx-swap="outerHTML">
+                            <%= i %>
+                        </button>
+                    <% } %>
+
+                    <% if (page < totalPages) { %>
+                        <button class="btn-page"
+                                hx-get="/admin/dashboard?page=<%= page + 1 %>" 
+                                hx-target="#dashboard-content" 
+                                hx-select="#dashboard-content"
+                                hx-swap="outerHTML">
+                            <i data-lucide="chevron-right" size="18"></i>
+                        </button>
+                    <% } %>
+                </div>
+                <% } %>
+            </div>
+        </div>
+
+<% if (!onlyContent) { %>
+    </main>
 
     <script>
         lucide.createIcons();
@@ -493,6 +678,12 @@
                 overlay.classList.remove('active');
             });
         }
+
+        // Tự động re-init Lucide icon sau khi HTMX swap xong
+        document.body.addEventListener('htmx:afterOnLoad', function() {
+            lucide.createIcons();
+        });
     </script>
 </body>
 </html>
+<% } %>

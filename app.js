@@ -27,8 +27,8 @@ app.use(session({
 
 // Global middleware to provide SITE_URL to all views
 app.use((req, res, next) => {
-    res.locals.SITE_URL = SITE_URL;
-    next();
+        res.locals.SITE_URL = SITE_URL;
+        next();
 });
 
 // ==================== ROUTES ====================
@@ -41,6 +41,9 @@ app.get('/post/:slug', homeController.post);
 
 // Trang giới thiệu
 app.get('/about', homeController.about);
+
+// API Tracking
+app.post('/api/track-click/:id', homeController.trackClick);
 
 // Admin - Đăng nhập
 app.get('/admin/login', adminController.loginPage);
@@ -62,6 +65,9 @@ app.post('/admin/save', adminController.checkAuth, adminController.saveArticle);
 // Admin - Xóa bài viết
 app.post('/admin/delete/:id', adminController.checkAuth, adminController.deleteArticle);
 
+// Admin - Đổi trạng thái bài viết
+app.post('/admin/toggle-status/:id', adminController.checkAuth, adminController.toggleStatus);
+
 // 404 - Không tìm thấy
 app.use((req, res) => {
         res.status(404).render('404', {
@@ -70,11 +76,11 @@ app.use((req, res) => {
         });
 });
 
-// Khởi động server
-app.listen(PORT, () => {
+// Khởi động server (CHỈ THÊM '0.0.0.0' VÀO ĐÂY)
+app.listen(PORT, '0.0.0.0', () => {
         console.log('='.repeat(50));
         console.log('🚀 Website đang chạy tại:');
-        console.log(`   📖 Người dùng: http://localhost:${PORT}`);
-        console.log(`   🔐 Admin:      http://localhost:${PORT}/admin/login`);
+        console.log(`    📖 Người dùng: http://localhost:${PORT}`);
+        console.log(`    🔐 Admin:      http://localhost:${PORT}/admin/login`);
         console.log('='.repeat(50));
 });

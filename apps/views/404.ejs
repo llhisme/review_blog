@@ -1,13 +1,30 @@
 <%- include('partials/header') %>
 
-        <div class="error-page">
-                <h1>
-                        <%= title || '404' %>
-                </h1>
-                <p>
-                        <%= typeof message !=='undefined' ? message : 'Trang bạn tìm không tồn tại!' %>
-                </p>
-                <a href="/" class="btn">Về trang chủ</a>
+<div class="container">
+    <div style="min-height: 70vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 4rem 1rem;">
+        <div style="position: relative; margin-bottom: 2rem;">
+            <h1 style="font-size: 10rem; font-weight: 800; line-height: 1; margin: 0; background: linear-gradient(135deg, #fb7185 0%, #e11d48 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; opacity: 0.1;">404</h1>
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%;">
+                <i data-lucide="search-x" size="80" style="color: #e11d48; margin-bottom: 1.5rem;"></i>
+                <h2 style="font-size: 2.5rem; font-weight: 800; color: var(--text-color); margin-bottom: 1rem;">Ối! Trang này không tìm thấy</h2>
+            </div>
         </div>
+        
+        <p style="font-size: 1.25rem; color: var(--text-muted); max-width: 500px; margin-bottom: 3rem; line-height: 1.7;">
+            <%= typeof message !== 'undefined' ? message : 'Có vẻ như bài viết nàng đang tìm kiếm đã được chuyển sang một "phòng thay đồ" khác hoặc đã bị gỡ bỏ.' %>
+        </p>
+        
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;">
+            <a href="/" class="affiliate-btn" style="text-transform: none;">
+                <i data-lucide="home"></i>
+                <span>Quay về trang chủ</span>
+            </a>
+            <a href="javascript:history.back()" class="btn-compare-aff" style="width: auto; margin-top: 0; padding: 1rem 2.5rem;">
+                <i data-lucide="arrow-left"></i>
+                <span>Quay lại trang trước</span>
+            </a>
+        </div>
+    </div>
+</div>
 
-        <%- include('partials/footer') %>
+<%- include('partials/footer') %>

@@ -1,10 +1,19 @@
 var db = require('../../config/database');
 
 var ArticleModel = {
-        // Lấy tất cả bài viết (Cho Admin - thấy cả active và inactive)
+        // Lấy bài viết có phân trang (Cho Admin)
+        getPaginated: async (offset, limit) => {
+                const { rows } = await db.query(
+                        'SELECT id, title, slug, excerpt, thumbnail, status, views, affiliate_clicks, created_at FROM articles ORDER BY id DESC LIMIT $1 OFFSET $2',
+                        [limit, offset]
+                );
+                return rows;
+        },
+
+        // Lấy tất cả bài viết (Dùng cho các trường hợp cần list đầy đủ)
         getAll: async () => {
                 const { rows } = await db.query(
-                        'SELECT id, title, slug, excerpt, thumbnail, status, created_at FROM articles ORDER BY id DESC'
+                        'SELECT id, title, slug, excerpt, thumbnail, status, views, affiliate_clicks, created_at FROM articles ORDER BY id DESC'
                 );
                 return rows;
         },
@@ -150,6 +159,95 @@ var ArticleModel = {
                 }
                 const { rows } = await db.query(query, params);
                 return parseInt(rows[0].total);
+        },
+
+        // Tăng lượt xem bài viết
+        incrementViews: async (id) => {
+                // 1. Tăng tổng lượt xem trong bảng articles
+                await db.query(
+                        'UPDATE articles SET views = COALESCE(views, 0) + 1 WHERE id = $1',
+                        [id]
+                );
+                // 2. Tăng lượt xem trong ngày tại bảng article_stats
+                await db.query(`
+                        INSERT INTO article_stats (article_id, stat_date, views)
+                        VALUES ($1, CURRENT_DATE, 1)
+                        ON CONFLICT (article_id, stat_date) 
+                        DO UPDATE SET views = article_stats.views + 1
+                `, [id]);
+        },
+
+        // Tăng lượt click affiliate
+        incrementClicks: async (id) => {
+                // 1. Tăng tổng click trong bảng articles
+                await db.query(
+                        'UPDATE articles SET affiliate_clicks = COALESCE(affiliate_clicks, 0) + 1 WHERE id = $1',
+                        [id]
+                );
+                // 2. Tăng click trong ngày tại bảng article_stats
+                await db.query(`
+                        INSERT INTO article_stats (article_id, stat_date, affiliate_clicks)
+                        VALUES ($1, CURRENT_DATE, 1)
+                        ON CONFLICT (article_id, stat_date) 
+                        DO UPDATE SET affiliate_clicks = article_stats.affiliate_clicks + 1
+                `, [id]);
+        },
+
+        // Đổi trạng thái bài viết (Hoạt động <-> Ẩn)
+        toggleStatus: async (id) => {
+                await db.query(
+                        "UPDATE articles SET status = CASE WHEN status = 'active' THEN 'inactive' ELSE 'active' END WHERE id = $1",
+                        [id]
+                );
+                return true;
+        },
+
+        // Lấy thống kê cho Dashboard (Hỗ trợ lọc theo ngày)
+        getStats: async (date = null) => {
+                let totalViewsQuery, totalClicksQuery, topViewedQuery, topClickedQuery;
+                let params = [];
+
+                if (date) {
+                        // Thống kê theo một ngày cụ thể
+                        totalViewsQuery = "SELECT SUM(COALESCE(s.views, 0)) as total FROM article_stats s JOIN articles a ON s.article_id = a.id WHERE s.stat_date = $1 AND a.status = 'active'";
+                        totalClicksQuery = "SELECT SUM(COALESCE(s.affiliate_clicks, 0)) as total FROM article_stats s JOIN articles a ON s.article_id = a.id WHERE s.stat_date = $1 AND a.status = 'active'";
+                        
+                        topViewedQuery = `
+                                SELECT a.id, a.title, a.slug, s.views, s.affiliate_clicks 
+                                FROM article_stats s 
+                                JOIN articles a ON s.article_id = a.id 
+                                WHERE s.stat_date = $1 AND a.status = 'active' 
+                                ORDER BY s.views DESC LIMIT 5
+                        `;
+                        
+                        topClickedQuery = `
+                                SELECT a.id, a.title, a.slug, s.views, s.affiliate_clicks 
+                                FROM article_stats s 
+                                JOIN articles a ON s.article_id = a.id 
+                                WHERE s.stat_date = $1 AND a.status = 'active' 
+                                ORDER BY s.affiliate_clicks DESC LIMIT 5
+                        `;
+                        params = [date];
+                } else {
+                        // Thống kê Tổng (All Time)
+                        totalViewsQuery = "SELECT SUM(COALESCE(views, 0)) as total FROM articles WHERE status = 'active'";
+                        totalClicksQuery = "SELECT SUM(COALESCE(affiliate_clicks, 0)) as total FROM articles WHERE status = 'active'";
+                        
+                        topViewedQuery = "SELECT id, title, slug, views, affiliate_clicks FROM articles WHERE status = 'active' ORDER BY COALESCE(views, 0) DESC LIMIT 5";
+                        topClickedQuery = "SELECT id, title, slug, views, affiliate_clicks FROM articles WHERE status = 'active' ORDER BY COALESCE(affiliate_clicks, 0) DESC LIMIT 5";
+                }
+
+                const totalViews = await db.query(totalViewsQuery, params);
+                const totalClicks = await db.query(totalClicksQuery, params);
+                const topViewed = await db.query(topViewedQuery, params);
+                const topClicked = await db.query(topClickedQuery, params);
+
+                return {
+                        totalViews: parseInt(totalViews.rows[0].total || 0),
+                        totalClicks: parseInt(totalClicks.rows[0].total || 0),
+                        topViewed: topViewed.rows,
+                        topClicked: topClicked.rows
+                };
         }
 };
 

@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const sanitizeHtml = require('sanitize-html');
 
 const sanitizeOptions = {
-        allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'iframe', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'caption', 'colgroup', 'col']),
+        allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'iframe', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'caption', 'colgroup', 'col', 'span', 'u', 's']),
         allowedAttributes: {
                 ...sanitizeHtml.defaults.allowedAttributes,
                 '*': ['style', 'class', 'id'],
@@ -12,6 +12,15 @@ const sanitizeOptions = {
                 'table': ['cellpadding', 'cellspacing', 'border'],
                 'th': ['colspan', 'rowspan'],
                 'td': ['colspan', 'rowspan']
+        },
+        allowedStyles: {
+                '*': {
+                        // Allow all styles for now to ensure Quill compatibility
+                        'color': [/^#(?:[0-9a-fA-F]{3}){1,2}$/, /^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/],
+                        'background-color': [/^#(?:[0-9a-fA-F]{3}){1,2}$/, /^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/],
+                        'text-align': [/^left$/, /^right$/, /^center$/, /^justify$/],
+                        'font-size': [/^\d+(?:px|em|rem|%)$|small|medium|large|huge/]
+                }
         }
 };
 
@@ -26,6 +35,9 @@ const adminController = {
 
         // Trang đăng nhập
         loginPage: (req, res) => {
+                if (req.session && req.session.isAdmin) {
+                        return res.redirect('/admin/dashboard');
+                }
                 res.render('admin/login', {
                         title: 'Đăng nhập Admin',
                         error: null
@@ -83,13 +95,39 @@ const adminController = {
         // Dashboard - Danh sách bài viết
         dashboard: async (req, res) => {
                 try {
-                        const articles = await ArticleModel.getAll();
+                        const page = parseInt(req.query.page) || 1;
+                        const limit = 10;
+                        const offset = (page - 1) * limit;
+                        const selectedDate = req.query.date || null; // Lấy ngày từ query bài viết
+
+                        const articles = await ArticleModel.getPaginated(offset, limit);
                         const totalArticles = await ArticleModel.count();
+                        const totalPages = Math.ceil(totalArticles / limit);
+                        const stats = await ArticleModel.getStats(selectedDate); // Truyền ngày vào stats
+
+                        // Nếu là request từ HTMX, chỉ trả về phần nội dung (Stats + Table)
+                        if (req.headers['hx-request']) {
+                                return res.render('admin/dashboard', {
+                                        layout: false,
+                                        articles,
+                                        stats,
+                                        totalArticles,
+                                        page,
+                                        totalPages,
+                                        selectedDate, // Gửi lại ngày đã chọn
+                                        onlyContent: true
+                                });
+                        }
 
                         res.render('admin/dashboard', {
                                 title: 'Quản lý bài viết',
                                 articles,
                                 totalArticles,
+                                stats,
+                                page,
+                                totalPages,
+                                selectedDate, // Gửi lại ngày đã chọn
+                                onlyContent: false,
                                 success: req.query.success || null
                         });
                 } catch (error) {
@@ -172,6 +210,30 @@ const adminController = {
                 } catch (error) {
                         console.error('Delete article error:', error);
                         res.status(500).send('Lỗi khi xóa bài viết');
+                }
+        },
+
+        // Đổi trạng thái bài viết (Hoạt động <-> Ẩn)
+        toggleStatus: async (req, res) => {
+                try {
+                        await ArticleModel.toggleStatus(req.params.id);
+                        
+                        // Lấy URL hiện tại từ header HTMX để giữ nguyên trang và bộ lọc ngày
+                        const currentUrl = req.header('hx-current-url');
+                        if (currentUrl) {
+                                try {
+                                        // Trích xuất path và query string để redirect chính xác
+                                        const urlObj = new URL(currentUrl, `${req.protocol}://${req.get('host')}`);
+                                        return res.redirect(urlObj.pathname + urlObj.search);
+                                } catch (e) {
+                                        console.error('URL parse error:', e);
+                                }
+                        }
+                        
+                        res.redirect('/admin/dashboard');
+                } catch (error) {
+                        console.error('Toggle status error:', error);
+                        res.status(500).send('Lỗi khi đổi trạng thái');
                 }
         }
 };

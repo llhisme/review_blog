@@ -26,7 +26,7 @@
 </head>
 
 <body hx-boost="true">
-        <header class="site-header">
+        <header class="site-header" id="site-header" hx-preserve="true">
                 <div class="container">
                         <nav class="navbar">
                                 <a href="/" class="logo">
@@ -53,30 +53,93 @@
                 // Enable View Transitions
                 htmx.config.globalViewTransitions = true;
 
+                // CHỐNG CHỚP: Tắt View Transition của trình duyệt khi Lọc bài viết
+                // (Chỉ dùng View Transition cho việc chuyển trang toàn bộ)
+                document.addEventListener('htmx:beforeTransition', function(evt) {
+                    if (evt.detail.target && evt.detail.target.id === 'search-results') {
+                        evt.preventDefault(); // Chặn trình duyệt snapshot toàn trang
+                    }
+                });
+
                 // Mobile menu toggle logic
                 function initMobileMenu() {
                         const menuBtn = document.getElementById('mobile-menu-btn');
                         const navMenu = document.getElementById('nav-menu');
 
                         if (menuBtn && navMenu) {
-                                // Clone node to remove old event listeners before adding new one
                                 const newMenuBtn = menuBtn.cloneNode(true);
                                 menuBtn.parentNode.replaceChild(newMenuBtn, menuBtn);
 
                                 newMenuBtn.addEventListener('click', () => {
                                         navMenu.classList.toggle('active');
-                                        const icon = newMenuBtn.querySelector('i');
                                         if (navMenu.classList.contains('active')) {
-                                                icon.setAttribute('data-lucide', 'x');
+                                                newMenuBtn.innerHTML = '<i data-lucide="x"></i>';
                                         } else {
-                                                icon.setAttribute('data-lucide', 'menu');
+                                                newMenuBtn.innerHTML = '<i data-lucide="menu"></i>';
                                         }
                                         lucide.createIcons();
                                 });
                         }
                 }
 
-                document.addEventListener('DOMContentLoaded', initMobileMenu);
-                document.addEventListener('htmx:afterSettle', initMobileMenu);
+                // Custom Select Initialization
+                function initCustomSelects() {
+                    document.querySelectorAll('.custom-select-wrapper').forEach(wrapper => {
+                        const trigger = wrapper.querySelector('.custom-select-trigger-unified');
+                        const optionsList = wrapper.querySelector('.custom-options-list');
+                        const hiddenInput = wrapper.querySelector('input[type="hidden"]');
+                        const options = wrapper.querySelectorAll('.custom-option');
+
+                        if (!trigger || !hiddenInput) return;
+
+                        // Gỡ bỏ event listener cũ nếu có (để tránh lặp)
+                        const newTrigger = trigger.cloneNode(true);
+                        trigger.parentNode.replaceChild(newTrigger, trigger);
+
+                        newTrigger.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            document.querySelectorAll('.custom-select-wrapper').forEach(w => {
+                                if (w !== wrapper) w.classList.remove('open');
+                            });
+                            wrapper.classList.toggle('open');
+                        });
+
+                        options.forEach(opt => {
+                            opt.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                const value = opt.getAttribute('data-value');
+                                const text = opt.innerText;
+
+                                newTrigger.querySelector('span').innerText = text;
+                                options.forEach(o => o.classList.remove('selected'));
+                                opt.classList.add('selected');
+                                
+                                hiddenInput.value = value;
+                                wrapper.classList.remove('open');
+                                
+                                htmx.trigger('#filter-form', 'submit');
+                            });
+                        });
+                    });
+
+                    // Đóng menu khi click ra ngoài
+                    document.removeEventListener('click', closeAllSelects);
+                    document.addEventListener('click', closeAllSelects);
+                }
+
+                function closeAllSelects() {
+                    document.querySelectorAll('.custom-select-wrapper').forEach(w => w.classList.remove('open'));
+                }
+
+                document.addEventListener('DOMContentLoaded', () => {
+                    initMobileMenu();
+                    initCustomSelects();
+                });
+                
+                document.addEventListener('htmx:afterSettle', () => {
+                    initMobileMenu();
+                    initCustomSelects();
+                    if (typeof lucide !== 'undefined') lucide.createIcons();
+                });
         </script>
         <main>
