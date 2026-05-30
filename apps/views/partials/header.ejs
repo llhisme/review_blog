@@ -75,25 +75,23 @@
                     }
                 });
 
-                // Mobile menu toggle logic
-                function initMobileMenu() {
-                        const menuBtn = document.getElementById('mobile-menu-btn');
+                // Mobile menu toggle logic (SỬ DỤNG EVENT DELEGATION để chống liệt khi Back trang)
+                if (!window.mobileMenuAttached) {
+                    document.addEventListener('click', (e) => {
+                        const menuBtn = e.target.closest('#mobile-menu-btn');
                         const navMenu = document.getElementById('nav-menu');
-
+                        
                         if (menuBtn && navMenu) {
-                                const newMenuBtn = menuBtn.cloneNode(true);
-                                menuBtn.parentNode.replaceChild(newMenuBtn, menuBtn);
-
-                                newMenuBtn.addEventListener('click', () => {
-                                        navMenu.classList.toggle('active');
-                                        if (navMenu.classList.contains('active')) {
-                                                newMenuBtn.innerHTML = '<i data-lucide="x"></i>';
-                                        } else {
-                                                newMenuBtn.innerHTML = '<i data-lucide="menu"></i>';
-                                        }
-                                        lucide.createIcons();
-                                });
+                            navMenu.classList.toggle('active');
+                            if (navMenu.classList.contains('active')) {
+                                menuBtn.innerHTML = '<i data-lucide="x"></i>';
+                            } else {
+                                menuBtn.innerHTML = '<i data-lucide="menu"></i>';
+                            }
+                            lucide.createIcons();
                         }
+                    });
+                    window.mobileMenuAttached = true;
                 }
 
                 // Custom Select Initialization
@@ -146,12 +144,10 @@
                 }
 
                 document.addEventListener('DOMContentLoaded', () => {
-                    initMobileMenu();
                     initCustomSelects();
                 });
                 
                 document.addEventListener('htmx:afterSettle', () => {
-                    initMobileMenu();
                     initCustomSelects();
                     if (typeof lucide !== 'undefined') lucide.createIcons();
                 });
