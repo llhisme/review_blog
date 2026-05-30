@@ -30,3 +30,5 @@ yarn-error.log*
 # Build/Dist
 dist/
 build/
+
+note.txt
