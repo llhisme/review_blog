@@ -71,10 +71,10 @@ var ArticleModel = {
 
         // Tạo bài viết mới
         create: async (data) => {
-                const { title, slug, excerpt, content, thumbnail, affiliate_link, status, category, skin_type, price_range } = data;
+                const { title, slug, excerpt, content, thumbnail, affiliate_link, status, category, skin_type, price_range, recommended_slug } = data;
                 const { rows } = await db.query(
-                        'INSERT INTO articles (title, slug, excerpt, content, thumbnail, affiliate_link, status, category, skin_type, price_range) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id',
-                        [title, slug, excerpt, content, thumbnail || null, affiliate_link || null, status || 'active', category || null, skin_type || null, price_range || null]
+                        'INSERT INTO articles (title, slug, excerpt, content, thumbnail, affiliate_link, status, category, skin_type, price_range, recommended_slug) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id',
+                        [title, slug, excerpt, content, thumbnail || null, affiliate_link || null, status || 'active', category || null, skin_type || null, price_range || null, recommended_slug || null]
                 );
                 return rows[0].id;
         },
@@ -85,7 +85,7 @@ var ArticleModel = {
                 console.log('Model ID Received:', id);
                 console.log('Model Data Received:', data);
 
-                const { title, slug, excerpt, content, thumbnail, affiliate_link, status, category, skin_type, price_range } = data;
+                const { title, slug, excerpt, content, thumbnail, affiliate_link, status, category, skin_type, price_range, recommended_slug } = data;
                 
                 const query = `
                         UPDATE articles 
@@ -99,8 +99,9 @@ var ArticleModel = {
                             category = $8,
                             skin_type = $9,
                             price_range = $10,
-                            updated_at = CURRENT_TIMESTAMP 
-                        WHERE id = $11
+                            updated_at = CURRENT_TIMESTAMP,
+                            recommended_slug = $11
+                        WHERE id = $12
                 `;
                 
                 const values = [
@@ -114,6 +115,7 @@ var ArticleModel = {
                         category || null,
                         skin_type || null,
                         price_range || null,
+                        recommended_slug || null,
                         id
                 ];
 
@@ -140,13 +142,38 @@ var ArticleModel = {
                 return true;
         },
 
-        // Lấy bài viết liên quan
-        getRelated: async (category, currentId) => {
-                const { rows } = await db.query(
-                        'SELECT id, title, slug, excerpt, thumbnail, category, skin_type FROM articles WHERE category = $1 AND id != $2 AND status = $3 ORDER BY RANDOM() LIMIT 3',
-                        [category, currentId, 'active']
-                );
-                return rows;
+        // Lấy bài viết liên quan (Có ưu tiên bài viết recommended)
+        getRelated: async (category, currentId, recommendedSlug = null) => {
+                let relatedArticles = [];
+                let excludeIds = [currentId];
+
+                // Nếu có bài viết được recommend, lấy nó lên đầu
+                if (recommendedSlug) {
+                        const { rows: recommendedRows } = await db.query(
+                                'SELECT id, title, slug, excerpt, thumbnail, category, skin_type FROM articles WHERE slug = $1 AND status = $2',
+                                [recommendedSlug, 'active']
+                        );
+                        if (recommendedRows.length > 0) {
+                                // Thêm cờ để view biết đây là bài được recommend
+                                recommendedRows[0].is_recommended = true;
+                                relatedArticles.push(recommendedRows[0]);
+                                excludeIds.push(recommendedRows[0].id);
+                        }
+                }
+
+                // Lấy thêm bài viết cùng chuyên mục để lấp đầy (tổng cộng 3 bài)
+                const limit = 3 - relatedArticles.length;
+                if (limit > 0) {
+                        // Tạo chuỗi tham số $1, $2, $3... cho excludeIds
+                        const excludeParams = excludeIds.map((_, index) => `$${index + 3}`).join(',');
+                        const { rows } = await db.query(
+                                `SELECT id, title, slug, excerpt, thumbnail, category, skin_type FROM articles WHERE category = $1 AND status = $2 AND id NOT IN (${excludeParams}) ORDER BY RANDOM() LIMIT ${limit}`,
+                                [category, 'active', ...excludeIds]
+                        );
+                        relatedArticles = relatedArticles.concat(rows);
+                }
+
+                return relatedArticles;
         },
 
         // Đếm số bài viết

@@ -2,10 +2,10 @@
 
 <div class="container">
     <div class="post-layout-container">
-        <!-- Sidebar with Table of Contents -->
+        <!-- SIDEBAR: Table of Contents -->
         <aside class="post-sidebar">
             <div class="toc-card">
-                <h3><i data-lucide="list"></i> Nội dung chính</h3>
+                <h3><i data-lucide="list"></i> MỤC LỤC</h3>
                 <nav>
                     <ul class="toc-list" id="toc-list">
                         <!-- ToC items will be generated here -->
@@ -14,21 +14,13 @@
             </div>
         </aside>
 
-        <!-- Main Article Content -->
+        <!-- MAIN ARTICLE CONTENT -->
         <article class="full-post">
             <header class="post-header">
                 <h1><%= article.title %></h1>
                 <div class="post-meta">
-                    <span>
-                        <i data-lucide="calendar" size="18"></i>
-                        Ngày đăng: <%= new Date(article.created_at).toLocaleDateString('vi-VN') %>
-                    </span>
-                    <% if (article.updated_at) { %>
-                        <span>
-                            <i data-lucide="refresh-cw" size="18"></i>
-                            Cập nhật: <%= new Date(article.updated_at).toLocaleDateString('vi-VN') %>
-                        </span>
-                    <% } %>
+                    <span class="meta-item"><i data-lucide="calendar"></i> <%= new Date(article.created_at).toLocaleDateString('vi-VN', { day: '2-digit', month: 'long', year: 'numeric' }) %></span>
+                    <span class="meta-item"><i data-lucide="tag"></i> <%= article.category === 'skincare' ? 'Chăm sóc da' : article.category === 'makeup' ? 'Trang điểm' : article.category %></span>
                 </div>
             </header>
 
@@ -39,15 +31,14 @@
             <% if (article.affiliate_link) { %>
             <div class="affiliate-box" data-article-id="<%= article.id %>">
                 <div class="affiliate-icon">
-                    <i data-lucide="shopping-cart"></i>
+                    <i data-lucide="shopping-cart" size="32"></i>
                 </div>
                 <div class="affiliate-info">
                     <h3>Ưu đãi dành riêng cho bạn!</h3>
                     <p>Sản phẩm này hiện đang có giá tốt nhất tại cửa hàng chính hãng.</p>
                 </div>
                 <a href="<%= article.affiliate_link %>" target="_blank" rel="nofollow" class="affiliate-btn">
-                    <span>Mua ngay</span>
-                    <i data-lucide="external-link" size="16"></i>
+                    <i data-lucide="external-link"></i> Mua ngay
                 </a>
             </div>
             <p class="disclaimer-text">* Lưu ý: Đây là liên kết tiếp thị, mình có thể nhận được một khoản hoa hồng nhỏ nếu bạn mua qua link này mà không tốn thêm bất kỳ chi phí nào cho bạn.</p>
@@ -55,14 +46,13 @@
 
             <div class="post-footer">
                 <div class="share-links">
-                    <a href="https://www.facebook.com/sharer/sharer.php?u=<%= encodeURIComponent(SITE_URL + '/post/' + article.slug) %>" target="_blank" class="share-btn">
-                        <i data-lucide="facebook" size="18" style="vertical-align: middle; margin-right: 5px;"></i>
-                        Chia sẻ Facebook
+                    <a href="https://www.facebook.com/sharer/sharer.php?u=<%= encodeURIComponent((typeof SITE_URL !== 'undefined' ? SITE_URL : 'http://localhost:3000') + '/post/' + article.slug) %>" target="_blank" class="share-btn">
+                        <i data-lucide="facebook"></i> Chia sẻ Facebook
                     </a>
-                </div>                <div class="back-link">
+                </div>
+                <div class="back-link">
                     <a href="/">
-                        <i data-lucide="chevron-left" size="18" style="vertical-align: middle;"></i>
-                        Quay lại trang chủ
+                        <i data-lucide="arrow-left"></i> Quay lại trang chủ
                     </a>
                 </div>
             </div>
@@ -84,6 +74,9 @@
                             <div class="no-thumb"><i data-lucide="image-off"></i></div>
                         <% } %>
                     </a>
+                    <% if (rel.is_recommended) { %>
+                        <span class="card-badge" style="background: #10b981; color: white; display: flex; align-items: center; gap: 0.25rem;"><i data-lucide="sparkles" size="14"></i> Mảnh ghép hoàn hảo</span>
+                    <% } %>
                     <div class="article-excerpt desktop-only"><%= rel.excerpt || (rel.content ? rel.content.replace(/<[^>]*>?/gm, '').substring(0, 120) + '...' : '') %></div>
                 </div>
                 <div class="article-card-content">
@@ -111,8 +104,6 @@
         if (!articleContent || !tocList) return;
 
         const headers = articleContent.querySelectorAll('h2');
-        
-        // Reset ToC if re-initializing
         tocList.innerHTML = '';
 
         if (headers.length === 0) {
@@ -123,50 +114,67 @@
             return;
         }
 
-        headers.forEach((header, index) => {
-            // Create unique ID for each header
+        const headerElements = Array.from(headers);
+        
+        headerElements.forEach((header, index) => {
             const id = 'section-' + (index + 1);
             header.setAttribute('id', id);
 
-            // Create ToC link
             const li = document.createElement('li');
             const a = document.createElement('a');
             a.setAttribute('href', '#' + id);
             a.textContent = header.textContent;
             
-            // Smooth scroll
             a.addEventListener('click', (e) => {
                 e.preventDefault();
-                header.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                // Optional: offset for sticky header
-                window.scrollBy(0, -100);
+                const targetId = a.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                
+                if (targetElement) {
+                    const headerOffset = 100;
+                    const elementPosition = targetElement.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
             });
 
             li.appendChild(a);
             tocList.appendChild(li);
         });
 
-        // Scrollspy for active ToC item
-        if (!window.tocScrollAttached) {
-            window.addEventListener('scroll', () => {
-                let current = '';
-                const currentHeaders = document.querySelectorAll('#article-content h2');
-                currentHeaders.forEach(header => {
-                    const headerTop = header.offsetTop;
-                    if (window.pageYOffset >= headerTop - 120) {
-                        current = header.getAttribute('id');
-                    }
-                });
+        // Bulletproof Scrollspy Logic
+        function updateActiveSection() {
+            // Khoảng bù cho Header và để kích hoạt sớm hơn một chút khi cuộn
+            const scrollPosition = window.scrollY + 150; 
+            let currentId = headerElements.length > 0 ? headerElements[0].getAttribute('id') : '';
 
-                document.querySelectorAll('.toc-list a').forEach(a => {
-                    a.classList.remove('active');
-                    if (a.getAttribute('href') === '#' + current) {
-                        a.classList.add('active');
-                    }
-                });
+            headerElements.forEach(header => {
+                // Tính toán vị trí tuyệt đối của thẻ H2 so với đầu trang web
+                const headerAbsoluteTop = header.getBoundingClientRect().top + window.scrollY;
+                if (scrollPosition >= headerAbsoluteTop) {
+                    currentId = header.getAttribute('id');
+                }
             });
-            window.tocScrollAttached = true;
+
+            // Cập nhật class active cho danh sách mục lục
+            document.querySelectorAll('.toc-list a').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + currentId) {
+                    link.classList.add('active');
+                }
+            });
         }
+
+        // Đảm bảo chỉ gán 1 lần
+        window.removeEventListener('scroll', updateActiveSection);
+        window.addEventListener('scroll', updateActiveSection);
+        
+        // Chạy ngay lần đầu tiên để xác định vị trí hiện tại
+        updateActiveSection();
     }
 
     document.addEventListener('DOMContentLoaded', initToc);

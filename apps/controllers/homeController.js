@@ -40,8 +40,8 @@ var homeController = {
                                 });
                         }
 
-                        // Lấy bài viết liên quan
-                        const relatedArticles = await ArticleModel.getRelated(article.category, article.id);
+                        // Lấy bài viết liên quan (Truyền thêm recommended_slug nếu có)
+                        const relatedArticles = await ArticleModel.getRelated(article.category, article.id, article.recommended_slug);
 
                         // Tối ưu lượt xem: Chỉ tăng view nếu chưa xem trong session này
                         if (!req.session.viewed_posts) {
