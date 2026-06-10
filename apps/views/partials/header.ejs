@@ -38,6 +38,9 @@
         <header class="site-header" id="site-header">
                 <div class="container">
                         <nav class="navbar">
+                                <button class="mobile-menu-btn" id="mobile-menu-btn">
+                                    <i data-lucide="menu"></i>
+                                </button>
                                 <a href="/" class="logo">
                                         <i data-lucide="sparkles"></i>
                                         <span>PurePick</span>
@@ -54,29 +57,24 @@
                                             <div class="user-profile-wrapper" id="user-profile-wrapper">
                                                 <button class="user-profile-btn" onclick="toggleUserDropdown(event)">
                                                     <img src="<%= locals.user.avatar_url %>" alt="Avatar" class="user-avatar">
-                                                    <span class="user-name"><%= locals.user.full_name || locals.user.username %></span>
-                                                    <i data-lucide="chevron-down" size="16"></i>
                                                 </button>
                                                 <div class="user-dropdown" id="user-dropdown">
-                                                    <div class="user-dropdown-header mobile-only">
+                                                    <a href="/profile" class="user-dropdown-header">
                                                         <img src="<%= locals.user.avatar_url %>" alt="Avatar" class="user-avatar-large">
                                                         <div class="user-info">
                                                             <strong><%= locals.user.full_name || locals.user.username %></strong>
                                                             <span>@<%= locals.user.username %></span>
                                                         </div>
-                                                    </div>
-                                                    <a href="/profile" class="dropdown-item"><i data-lucide="user" size="16"></i> Hồ sơ</a>
+                                                        <i data-lucide="chevron-right" size="16" style="margin-left: auto; color: var(--text-muted);"></i>
+                                                    </a>
                                                     <a href="/saved" class="dropdown-item"><i data-lucide="bookmark" size="16"></i> Đã lưu</a>
                                                     <div class="dropdown-divider"></div>
                                                     <a href="/auth/logout" class="dropdown-item logout"><i data-lucide="log-out" size="16"></i> Đăng xuất</a>
                                                 </div>
                                             </div>
                                         <% } else { %>
-                                            <a href="javascript:void(0)" class="login-btn" onclick="openAuthModal()"><i data-lucide="user"></i> <span>Đăng nhập</span></a>
+                                            <a href="javascript:void(0)" class="login-btn" onclick="openAuthModal()"><i data-lucide="user"></i> <span class="login-text">Đăng nhập</span></a>
                                         <% } %>
-                                        <button class="mobile-menu-btn" id="mobile-menu-btn">
-                                            <i data-lucide="menu"></i>
-                                        </button>
                                 </div>
                         </nav>
                 </div>
