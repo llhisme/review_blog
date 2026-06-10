@@ -1,10 +1,24 @@
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
+const multer = require('multer');
+
+// Cấu hình Multer cho Avatar Upload
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'public/uploads/avatars')
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+        cb(null, 'avatar-' + uniqueSuffix + path.extname(file.originalname))
+    }
+});
+const upload = multer({ storage: storage });
 
 // Import controllers
 const homeController = require('./apps/controllers/homeController');
 const adminController = require('./apps/controllers/adminController');
+const authController = require('./apps/controllers/authController');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -25,9 +39,16 @@ app.use(session({
         cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 } // 24h
 }));
 
-// Global middleware to provide SITE_URL to all views
+// Global middleware to provide SITE_URL and user session to all views
 app.use((req, res, next) => {
         res.locals.SITE_URL = SITE_URL;
+        res.locals.user = req.session.userId ? { 
+            id: req.session.userId, 
+            username: req.session.username, 
+            role: req.session.role,
+            full_name: req.session.full_name,
+            avatar_url: req.session.avatar_url
+        } : null;
         next();
 });
 
@@ -41,6 +62,18 @@ app.get('/post/:slug', homeController.post);
 
 // Trang giới thiệu
 app.get('/about', homeController.about);
+
+// Auth & User routes
+app.post('/auth/login', authController.login);
+app.post('/auth/register', authController.register);
+app.get('/auth/logout', authController.logout);
+app.get('/saved', authController.savedArticlesPage);
+app.get('/profile', authController.profilePage);
+app.post('/api/profile', upload.single('avatar'), authController.updateProfile);
+
+// API User Interactions
+app.post('/api/save/:id', authController.toggleSave);
+app.post('/api/like/:id', authController.toggleLike);
 
 // API Tracking
 app.post('/api/track-click/:id', homeController.trackClick);

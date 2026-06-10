@@ -1,4 +1,5 @@
 var ArticleModel = require('../model/articleModel');
+var UserModel = require('../model/userModel');
 
 var homeController = {
         // Trang chủ - Hiển thị danh sách bài viết ĐANG HOẠT ĐỘNG
@@ -43,6 +44,14 @@ var homeController = {
                         // Lấy bài viết liên quan (Truyền thêm recommended_slug nếu có)
                         const relatedArticles = await ArticleModel.getRelated(article.category, article.id, article.recommended_slug);
 
+                        // Lấy trạng thái Save và Like của user
+                        let isSaved = false;
+                        let isLiked = false;
+                        if (req.session.userId) {
+                            isSaved = await UserModel.isSaved(req.session.userId, article.id);
+                            isLiked = await UserModel.isLiked(req.session.userId, article.id);
+                        }
+
                         // Tối ưu lượt xem: Chỉ tăng view nếu chưa xem trong session này
                         if (!req.session.viewed_posts) {
                                 req.session.viewed_posts = [];
@@ -58,7 +67,9 @@ var homeController = {
                         res.render('post', {
                                 title: article.title,
                                 article,
-                                relatedArticles
+                                relatedArticles,
+                                isSaved,
+                                isLiked
                         });
                 } catch (error) {
                         console.error('Post page error:', error);

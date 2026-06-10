@@ -563,6 +563,45 @@
     align-items: center;
 }
 
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    background: white;
+    color: var(--text-color);
+    padding: 0.8rem 1.5rem;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    font-weight: 700;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.action-btn:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.action-btn.active {
+    background: #fff1f2;
+    color: #e11d48;
+    border-color: #fecdd3;
+}
+
+.action-btn.active .filled-icon {
+    fill: #e11d48;
+}
+
 .share-btn {
     background: #1877f2;
     color: white !important;

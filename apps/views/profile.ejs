@@ -1,0 +1,76 @@
+<%- include('partials/header') %>
+
+<!-- Link CSS riêng cho trang Hồ sơ -->
+<link rel="stylesheet" href="/css/profile.css">
+
+<div class="container">
+    <div class="profile-page-header">
+        <h1>Hồ sơ của tôi</h1>
+        <p>Quản lý thông tin cá nhân và tài khoản của bạn</p>
+    </div>
+
+    <div class="profile-container">
+        <!-- Form cập nhật thông tin -->
+        <form hx-post="/api/profile" hx-target="#profile-status" hx-swap="innerHTML" enctype="multipart/form-data">
+            
+            <!-- Khối hiển thị và Upload Avatar -->
+            <div class="profile-avatar-section">
+                <div class="profile-avatar-wrapper" onclick="document.getElementById('avatar_upload').click()">
+                    <img src="<%= user.avatar_url %>" id="avatar_preview_img" alt="Avatar" class="profile-avatar-preview">
+                    <div class="profile-avatar-overlay">
+                        <i data-lucide="camera" size="24"></i>
+                        <span style="font-size: 0.75rem; margin-top: 0.25rem; font-weight: 600;">Đổi ảnh</span>
+                    </div>
+                </div>
+                <input type="file" id="avatar_upload" name="avatar" accept="image/*" style="display: none;" onchange="previewAvatar(event)">
+                <div class="profile-username">@<%= user.username %></div>
+                <div class="profile-role"><%= user.role === 'admin' ? 'Quản trị viên' : 'Thành viên' %></div>
+            </div>
+
+            <div id="profile-status" class="profile-status-container"></div>
+            
+            <div class="profile-form-group">
+                <label for="full_name"><i data-lucide="user" size="16" style="vertical-align: middle; margin-right: 4px;"></i> Họ và tên hiển thị</label>
+                <input type="text" id="full_name" name="full_name" class="profile-input" value="<%= user.full_name || '' %>" required placeholder="Nhập họ và tên của bạn">
+            </div>
+
+            <h3 style="font-size: 1.1rem; color: var(--primary-dark); margin: 3rem 0 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid #f1f5f9;">Đổi mật khẩu</h3>
+
+
+            <div class="profile-form-group">
+                <label for="new_password"><i data-lucide="lock" size="16" style="vertical-align: middle; margin-right: 4px;"></i> Mật khẩu mới</label>
+                <input type="password" id="new_password" name="new_password" class="profile-input" placeholder="Để trống nếu không muốn đổi">
+            </div>
+
+            <div class="profile-form-group">
+                <label for="confirm_new_password"><i data-lucide="check-circle" size="16" style="vertical-align: middle; margin-right: 4px;"></i> Xác nhận mật khẩu mới</label>
+                <input type="password" id="confirm_new_password" name="confirm_new_password" class="profile-input" placeholder="Nhập lại mật khẩu mới">
+            </div>
+
+            <button type="submit" class="profile-submit-btn">
+                <i data-lucide="save"></i> Lưu thay đổi
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function previewAvatar(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('avatar_preview_img').src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    document.addEventListener('htmx:afterSettle', function(evt) {
+        if (evt.detail.target.id === 'profile-status') {
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+    });
+</script>
+
+<%- include('partials/footer') %>

@@ -45,14 +45,24 @@
             <% } %>
 
             <div class="post-footer">
-                <div class="share-links">
+                <div class="action-buttons" style="display: flex; gap: 1rem; flex-wrap: wrap;">
                     <a href="https://www.facebook.com/sharer/sharer.php?u=<%= encodeURIComponent((typeof SITE_URL !== 'undefined' ? SITE_URL : 'http://localhost:3000') + '/post/' + article.slug) %>" target="_blank" class="share-btn">
-                        <i data-lucide="facebook"></i> Chia sẻ Facebook
+                        <i data-lucide="facebook"></i> Chia sẻ
                     </a>
+                    
+                    <button class="action-btn <%= isLiked ? 'active' : '' %>" hx-post="/api/like/<%= article.id %>" hx-swap="outerHTML">
+                        <i data-lucide="heart" class="<%= isLiked ? 'filled-icon' : '' %>"></i> 
+                        <%= isLiked ? 'Đã thích' : 'Thích' %>
+                    </button>
+
+                    <button class="action-btn <%= isSaved ? 'active' : '' %>" hx-post="/api/save/<%= article.id %>" hx-swap="outerHTML">
+                        <i data-lucide="bookmark" class="<%= isSaved ? 'filled-icon' : '' %>"></i> 
+                        <%= isSaved ? 'Đã lưu' : 'Lưu bài' %>
+                    </button>
                 </div>
                 <div class="back-link">
                     <a href="/">
-                        <i data-lucide="arrow-left"></i> Quay lại trang chủ
+                        <i data-lucide="arrow-left"></i> Quay lại
                     </a>
                 </div>
             </div>

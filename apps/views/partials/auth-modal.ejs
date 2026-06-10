@@ -1,0 +1,101 @@
+<div id="auth-modal" class="auth-modal-overlay">
+    <div class="auth-modal-container">
+        <button class="auth-modal-close" onclick="closeAuthModal()">
+            <i data-lucide="x"></i>
+        </button>
+
+        <!-- Đăng nhập Form -->
+        <div id="login-form-container" class="auth-form-container active">
+            <div class="auth-modal-header">
+                <h2>Đăng nhập</h2>
+                <p>Chào mừng trở lại với PurePick</p>
+            </div>
+            <div class="auth-modal-body">
+                <div id="login-status" class="auth-status-container"></div>
+                <form hx-post="/auth/login" hx-target="#login-status" hx-swap="innerHTML">
+                    <div class="auth-form-group">
+                        <label for="login-username">Tên đăng nhập</label>
+                        <input type="text" id="login-username" name="username" class="auth-input" required autocomplete="off">
+                    </div>
+                    <div class="auth-form-group">
+                        <label for="login-password">Mật khẩu</label>
+                        <input type="password" id="login-password" name="password" class="auth-input" required>
+                    </div>
+                    <button type="submit" class="auth-submit-btn">
+                        Đăng nhập <i data-lucide="arrow-right" size="18"></i>
+                    </button>
+                </form>
+                <div class="auth-toggle-link">
+                    Chưa có tài khoản? <a onclick="toggleAuthForms()">Đăng ký ngay</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Đăng ký Form -->
+        <div id="register-form-container" class="auth-form-container">
+            <div class="auth-modal-header">
+                <h2>Tạo tài khoản</h2>
+                <p>Tham gia cộng đồng yêu làm đẹp</p>
+            </div>
+            <div class="auth-modal-body">
+                <div id="register-status" class="auth-status-container"></div>
+                <form hx-post="/auth/register" hx-target="#register-status" hx-swap="innerHTML">
+                    <div class="auth-form-group">
+                        <label for="register-fullname">Họ và tên</label>
+                        <input type="text" id="register-fullname" name="full_name" class="auth-input" required autocomplete="off" placeholder="Ví dụ: Nguyễn Văn A">
+                    </div>
+                    <div class="auth-form-group">
+                        <label for="register-username">Tên đăng nhập</label>
+                        <input type="text" id="register-username" name="username" class="auth-input" required autocomplete="off">
+                    </div>
+                    <div class="auth-form-group">
+                        <label for="register-password">Mật khẩu</label>
+                        <input type="password" id="register-password" name="password" class="auth-input" required minlength="6">
+                    </div>
+                    <div class="auth-form-group">
+                        <label for="register-confirm">Xác nhận mật khẩu</label>
+                        <input type="password" id="register-confirm" name="confirm_password" class="auth-input" required minlength="6">
+                    </div>
+                    <button type="submit" class="auth-submit-btn">
+                        Đăng ký <i data-lucide="user-plus" size="18"></i>
+                    </button>
+                </form>
+                <div class="auth-toggle-link">
+                    Đã có tài khoản? <a onclick="toggleAuthForms()">Đăng nhập</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openAuthModal() {
+        document.getElementById('auth-modal').classList.add('active');
+        // Reset forms
+        document.getElementById('login-status').innerHTML = '';
+        document.getElementById('register-status').innerHTML = '';
+    }
+
+    function closeAuthModal() {
+        document.getElementById('auth-modal').classList.remove('active');
+    }
+
+    function toggleAuthForms() {
+        document.getElementById('login-form-container').classList.toggle('active');
+        document.getElementById('register-form-container').classList.toggle('active');
+        document.getElementById('login-status').innerHTML = '';
+        document.getElementById('register-status').innerHTML = '';
+    }
+
+    // Đóng modal khi click ra ngoài
+    document.getElementById('auth-modal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeAuthModal();
+        }
+    });
+
+    // Lắng nghe sự kiện htmx để mở modal khi chưa đăng nhập
+    document.body.addEventListener('open-auth-modal', function() {
+        openAuthModal();
+    });
+</script>

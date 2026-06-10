@@ -110,7 +110,7 @@
     <div class="container">
         <section class="compact-filter-section" id="compact-filter-section" hx-preserve="true">
             <form action="/" method="GET" id="filter-form"
-                  hx-get="/" hx-trigger="submit, change from:select, keyup delay:400ms changed from:input" 
+                  hx-get="/" hx-trigger="submit, change, keyup from:#keyword-search-unified delay:400ms changed" 
                   hx-target="#search-results" hx-swap="innerHTML show:no-scroll" hx-push-url="true">
                 <input type="hidden" name="category" id="hidden-category-input" value="<%= (typeof filters !== 'undefined' && filters.category) ? filters.category : 'all' %>">
                 

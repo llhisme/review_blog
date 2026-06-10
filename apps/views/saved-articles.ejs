@@ -1,0 +1,70 @@
+<%- include('partials/header') %>
+
+<!-- Link CSS riêng cho trang này -->
+<link rel="stylesheet" href="/css/saved-articles.css">
+
+<div class="container">
+    <div class="saved-page-header">
+        <h1>Bài viết đã lưu</h1>
+        <p>Bộ sưu tập các bí kíp làm đẹp yêu thích của bạn</p>
+    </div>
+
+    <div class="articles-grid">
+        <% if (articles && articles.length > 0) { %>
+            <% articles.forEach(function(article) { %>
+                <article class="article-card" id="saved-card-<%= article.id %>">
+                    <div class="article-thumb">
+                        <a href="/post/<%= article.slug %>">
+                            <% if (article.thumbnail) { %>
+                                <img src="<%= article.thumbnail %>" alt="<%= article.title %>">
+                            <% } else { %>
+                                <div class="no-thumb"><i data-lucide="image-off"></i></div>
+                            <% } %>
+                        </a>
+                        <% if (article.category) { %>
+                            <span class="card-badge"><%= article.category === 'skincare' ? 'CHĂM SÓC DA' : article.category === 'makeup' ? 'TRANG ĐIỂM' : article.category.toUpperCase() %></span>
+                        <% } %>
+                        <button class="unsave-btn" 
+                                hx-post="/api/save/<%= article.id %>" 
+                                hx-target="#saved-card-<%= article.id %>" 
+                                hx-swap="delete"
+                                title="Bỏ lưu">
+                            <i data-lucide="bookmark" class="filled-icon"></i>
+                        </button>
+                        <div class="article-excerpt desktop-only"><%= article.excerpt || (article.content ? article.content.replace(/<[^>]*>?/gm, '').substring(0, 120) + '...' : '') %></div>
+                    </div>
+                    <div class="article-card-content">
+                        <h2><a href="/post/<%= article.slug %>"><%= article.title %></a></h2>
+                        <p class="article-excerpt-mobile mobile-only"><%= article.excerpt || (article.content ? article.content.replace(/<[^>]*>?/gm, '').substring(0, 120) + '...' : '') %></p>
+                        <div class="article-meta">
+                            <span class="article-date"><i data-lucide="tag" size="14"></i> <%= article.skin_type === 'oily' ? 'Da dầu' : article.skin_type === 'dry' ? 'Da khô' : article.skin_type === 'sensitive' ? 'Da nhạy cảm' : 'Mọi loại da' %></span>
+                            <span style="font-size: 0.75rem; opacity: 0.8;">Đã lưu: <%= new Date(article.saved_at).toLocaleDateString('vi-VN') %></span>
+                        </div>
+                    </div>
+                </article>
+            <% }); %>
+        <% } else { %>
+            <div class="empty-saved">
+                <i data-lucide="bookmark-minus" size="64"></i>
+                <h3>Bạn chưa lưu bài viết nào</h3>
+                <p>Hãy khám phá các bài review trên PurePick và nhấn nút "Lưu bài" để đọc lại sau nhé!</p>
+                <a href="/" class="affiliate-btn" style="text-transform: none; display: inline-flex; width: auto;">
+                    <i data-lucide="home"></i> Khám phá ngay
+                </a>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('htmx:afterSettle', function() {
+        const grid = document.querySelector('.articles-grid');
+        // Nếu grid tồn tại nhưng không còn thẻ article-card nào bên trong
+        if (grid && grid.querySelectorAll('.article-card').length === 0) {
+            // Tải lại trang để hiện trạng thái trống
+            window.location.reload();
+        }
+    });
+</script>
+
+<%- include('partials/footer') %>
