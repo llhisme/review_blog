@@ -91,17 +91,60 @@ var UserModel = {
         }
     },
 
-    // Lấy danh sách bài viết đã lưu của user
-    getSavedArticles: async (userId) => {
-        const { rows } = await db.query(
-            `SELECT a.id, a.title, a.slug, a.excerpt, a.thumbnail, a.category, a.skin_type, a.created_at, sa.saved_at
-             FROM articles a
-             JOIN saved_articles sa ON a.id = sa.article_id
-             WHERE sa.user_id = $1 AND a.status = 'active'
-             ORDER BY sa.saved_at DESC`,
-            [userId]
-        );
-        return rows;
+    // Lấy danh sách bài viết đã lưu của user (Có lọc và phân trang)
+    getSavedArticles: async (userId, filters = {}, limit = 8, offset = 0) => {
+        let query = `
+            SELECT a.id, a.title, a.slug, a.excerpt, a.thumbnail, a.category, a.skin_type, a.created_at, sa.saved_at
+            FROM articles a
+            JOIN saved_articles sa ON a.id = sa.article_id
+            WHERE sa.user_id = $1 AND a.status = 'active'
+        `;
+        let countQuery = `
+            SELECT COUNT(*) 
+            FROM articles a
+            JOIN saved_articles sa ON a.id = sa.article_id
+            WHERE sa.user_id = $1 AND a.status = 'active'
+        `;
+        let params = [userId];
+        let counter = 2;
+
+        if (filters.category && filters.category !== 'all') {
+            query += ` AND a.category = $${counter}`;
+            countQuery += ` AND a.category = $${counter}`;
+            params.push(filters.category);
+            counter++;
+        }
+
+        if (filters.skin_type && filters.skin_type !== 'all') {
+            query += ` AND a.skin_type = $${counter}`;
+            countQuery += ` AND a.skin_type = $${counter}`;
+            params.push(filters.skin_type);
+            counter++;
+        }
+
+        if (filters.price_range && filters.price_range !== 'all') {
+            query += ` AND a.price_range = $${counter}`;
+            countQuery += ` AND a.price_range = $${counter}`;
+            params.push(filters.price_range);
+            counter++;
+        }
+
+        if (filters.keyword && filters.keyword.trim() !== '') {
+            query += ` AND a.title ILIKE $${counter}`;
+            countQuery += ` AND a.title ILIKE $${counter}`;
+            params.push(`%${filters.keyword}%`);
+            counter++;
+        }
+
+        query += ` ORDER BY sa.saved_at DESC LIMIT $${counter} OFFSET $${counter + 1}`;
+        
+        const { rows: articles } = await db.query(query, [...params, limit, offset]);
+        const { rows: countRows } = await db.query(countQuery, params);
+        
+        return { 
+            articles, 
+            total: parseInt(countRows[0].count) 
+        };
     },
 
     // Cập nhật hồ sơ người dùng

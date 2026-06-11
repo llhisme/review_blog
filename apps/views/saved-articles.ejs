@@ -1,16 +1,7 @@
-<%- include('partials/header') %>
-
-<!-- Link CSS riêng cho trang này -->
-<link rel="stylesheet" href="/css/saved-articles.css">
-
-<div class="container">
-    <div class="saved-page-header">
-        <h1>Bài viết đã lưu</h1>
-        <p>Bộ sưu tập các bí kíp làm đẹp yêu thích của bạn</p>
-    </div>
-
-    <div class="articles-grid">
-        <% if (articles && articles.length > 0) { %>
+<% if (typeof isPartial !== 'undefined' && isPartial) { %>
+    <!-- HTMX PARTIAL: Chỉ trả về nội dung của grid và phân trang -->
+    <% if (articles && articles.length > 0) { %>
+        <div class="articles-grid">
             <% articles.forEach(function(article) { %>
                 <article class="article-card" id="saved-card-<%= article.id %>">
                     <div class="article-thumb">
@@ -43,28 +34,255 @@
                     </div>
                 </article>
             <% }); %>
-        <% } else { %>
-            <div class="empty-saved">
-                <i data-lucide="bookmark-minus" size="64"></i>
+        </div>
+
+        <% if (totalPages > 1) { %>
+            <div class="pagination-container" style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 3rem;">
+                <% if (currentPage > 1) { %>
+                    <button class="pagination-btn" hx-get="/saved?page=1&category=<%= filters.category || '' %>&skin_type=<%= filters.skin_type || '' %>&price_range=<%= filters.price_range || '' %>&keyword=<%= filters.keyword || '' %>" hx-target="#saved-results" hx-swap="innerHTML show:window:top" hx-push-url="true" title="Trang đầu"><i data-lucide="chevrons-left"></i></button>
+                    <button class="pagination-btn" hx-get="/saved?page=<%= currentPage - 1 %>&category=<%= filters.category || '' %>&skin_type=<%= filters.skin_type || '' %>&price_range=<%= filters.price_range || '' %>&keyword=<%= filters.keyword || '' %>" hx-target="#saved-results" hx-swap="innerHTML show:window:top" hx-push-url="true" title="Trang trước"><i data-lucide="chevron-left"></i></button>
+                <% } %>
+                
+                <% 
+                let startPage = Math.max(1, currentPage - 2);
+                let endPage = Math.min(totalPages, currentPage + 2);
+                if (currentPage <= 3) endPage = Math.min(totalPages, 5);
+                if (currentPage >= totalPages - 2) startPage = Math.max(1, totalPages - 4);
+                %>
+
+                <% if (startPage > 1) { %><button class="pagination-btn" disabled style="background: transparent; border: none; cursor: default;">...</button><% } %>
+
+                <% for(let p = startPage; p <= endPage; p++) { %>
+                    <button class="pagination-btn <%= p === currentPage ? 'active' : '' %>" hx-get="/saved?page=<%= p %>&category=<%= filters.category || '' %>&skin_type=<%= filters.skin_type || '' %>&price_range=<%= filters.price_range || '' %>&keyword=<%= filters.keyword || '' %>" hx-target="#saved-results" hx-swap="innerHTML show:window:top" hx-push-url="true"><%= p %></button>
+                <% } %>
+
+                <% if (endPage < totalPages) { %><button class="pagination-btn" disabled style="background: transparent; border: none; cursor: default;">...</button><% } %>
+
+                <% if (currentPage < totalPages) { %>
+                    <button class="pagination-btn" hx-get="/saved?page=<%= currentPage + 1 %>&category=<%= filters.category || '' %>&skin_type=<%= filters.skin_type || '' %>&price_range=<%= filters.price_range || '' %>&keyword=<%= filters.keyword || '' %>" hx-target="#saved-results" hx-swap="innerHTML show:window:top" hx-push-url="true" title="Trang sau"><i data-lucide="chevron-right"></i></button>
+                    <button class="pagination-btn" hx-get="/saved?page=<%= totalPages %>&category=<%= filters.category || '' %>&skin_type=<%= filters.skin_type || '' %>&price_range=<%= filters.price_range || '' %>&keyword=<%= filters.keyword || '' %>" hx-target="#saved-results" hx-swap="innerHTML show:window:top" hx-push-url="true" title="Trang cuối"><i data-lucide="chevrons-right"></i></button>
+                <% } %>
+            </div>
+        <% } %>
+    <% } else { %>
+        <div class="empty-saved">
+            <i data-lucide="bookmark-minus" size="64"></i>
+            <% if (filters.keyword || (filters.category && filters.category !== 'all') || (filters.skin_type && filters.skin_type !== 'all') || (filters.price_range && filters.price_range !== 'all')) { %>
+                <h3>Không tìm thấy bài viết nào</h3>
+                <p>Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm để tìm thấy bài viết bạn đã lưu nhé.</p>
+                <a href="/saved" class="affiliate-btn" style="text-transform: none; display: inline-flex; width: auto;">
+                     Xóa bộ lọc
+                </a>
+            <% } else { %>
                 <h3>Bạn chưa lưu bài viết nào</h3>
                 <p>Hãy khám phá các bài review trên PurePick và nhấn nút "Lưu bài" để đọc lại sau nhé!</p>
                 <a href="/" class="affiliate-btn" style="text-transform: none; display: inline-flex; width: auto;">
                     <i data-lucide="home"></i> Khám phá ngay
                 </a>
-            </div>
-        <% } %>
-    </div>
-</div>
+            <% } %>
+        </div>
+    <% } %>
 
-<script>
-    document.addEventListener('htmx:afterSettle', function() {
-        const grid = document.querySelector('.articles-grid');
-        // Nếu grid tồn tại nhưng không còn thẻ article-card nào bên trong
-        if (grid && grid.querySelectorAll('.article-card').length === 0) {
-            // Tải lại trang để hiện trạng thái trống
-            window.location.reload();
+<% } else { %>
+    <%- include('partials/header') %>
+    <link rel="stylesheet" href="/css/saved-articles.css">
+
+    <script>
+        function selectCategory(catId) {
+            const input = document.getElementById('hidden-category-input');
+            input.value = (input.value === catId) ? 'all' : catId;
+            htmx.trigger('#filter-form', 'submit');
         }
-    });
-</script>
 
-<%- include('partials/footer') %>
+        document.addEventListener('htmx:afterSettle', function(evt) {
+            // Xử lý active state cho category cards
+            const urlParams = new URLSearchParams(window.location.search);
+            const currentCat = urlParams.get('category') || 'all';
+            document.querySelectorAll('.cat-card').forEach(card => {
+                card.classList.toggle('active', card.getAttribute('data-category') === currentCat);
+            });
+            document.getElementById('hidden-category-input').value = currentCat;
+
+            // Xử lý auto-reload khi grid trống
+            if (evt.detail.target.classList.contains('article-card')) {
+                const grid = document.querySelector('.articles-grid');
+                if (grid && grid.querySelectorAll('.article-card').length === 0) {
+                    window.location.reload();
+                }
+            }
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        });
+    </script>
+
+    <div class="quick-categories-wrapper" id="quick-categories-wrapper" hx-preserve="true">
+        <div class="container">
+            <div class="quick-categories">
+                <% 
+                const categories = [
+                    { id: 'skincare', name: 'Dưỡng Da', icon: 'droplets' },
+                    { id: 'makeup', name: 'Trang Điểm', icon: 'sparkles' },
+                    { id: 'bodycare', name: 'Cơ Thể', icon: 'sun' },
+                    { id: 'haircare', name: 'Tóc', icon: 'wind' },
+                    { id: 'perfume', name: 'Nước Hoa', icon: 'flower' },
+                    { id: 'tools', name: 'Dụng Cụ', icon: 'scissors' },
+                    { id: 'supplements', name: 'Thực Phẩm', icon: 'pill' }
+                ];
+                %>
+                <% categories.forEach(cat => { %>
+                    <div class="cat-card <%= (typeof filters !== 'undefined' && filters.category === cat.id) ? 'active' : '' %>" 
+                         data-category="<%= cat.id %>" onclick="selectCategory('<%= cat.id %>')" style="cursor: pointer;">
+                        <div class="cat-icon"><i data-lucide="<%= cat.icon %>"></i></div>
+                        <span><%= cat.name %></span>
+                    </div>
+                <% }) %>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="saved-page-header">
+            <h1>Bài viết đã lưu</h1>
+            <p>Bộ sưu tập các bí kíp làm đẹp yêu thích của bạn</p>
+        </div>
+
+        <!-- Bộ lọc ĐỒNG BỘ với Trang Chủ -->
+        <section class="compact-filter-section" id="compact-filter-section" hx-preserve="true" style="margin-bottom: 3rem;">
+            <form action="/saved" method="GET" id="filter-form"
+                  hx-get="/saved" hx-trigger="submit, keyup from:#keyword-search-unified delay:400ms changed" 
+                  hx-target="#saved-results" hx-swap="innerHTML show:no-scroll" hx-push-url="true">
+                <input type="hidden" name="category" id="hidden-category-input" value="<%= (typeof filters !== 'undefined' && filters.category) ? filters.category : 'all' %>">
+                
+                <div class="mobile-filter-toggle" onclick="this.parentNode.querySelector('.filter-row').classList.toggle('show'); this.querySelector('.toggle-icon').classList.toggle('rotate');">
+                    <div style="display:flex; align-items:center; gap:0.5rem;"><i data-lucide="filter" size="18"></i><span>Lọc bài viết đã lưu</span></div>
+                    <i data-lucide="chevron-down" size="18" class="toggle-icon"></i>
+                </div>
+
+                <div class="filter-row">
+                    <!-- Search Input -->
+                    <div class="filter-search-container">
+                        <div class="filter-input-unified">
+                            <i data-lucide="search" size="18" style="color: var(--text-muted); margin-right: 0.75rem;"></i>
+                            <input type="text" name="keyword" id="keyword-search-unified" placeholder="Tìm trong danh sách..." value="<%= (typeof filters !== 'undefined' && filters.keyword) ? filters.keyword : '' %>" autocomplete="off">
+                        </div>
+                    </div>
+                    
+                    <!-- Custom Select: Skin Type -->
+                    <div class="custom-select-wrapper" id="skin-type-wrapper">
+                        <div class="filter-input-unified custom-select-trigger-unified">
+                            <span><%= (typeof filters !== 'undefined' && filters.skin_type === 'oily') ? 'Da dầu' : (typeof filters !== 'undefined' && filters.skin_type === 'dry') ? 'Da khô' : (typeof filters !== 'undefined' && filters.skin_type === 'sensitive') ? 'Da nhạy cảm' : 'Mọi loại da' %></span>
+                            <i data-lucide="chevron-down" size="18"></i>
+                        </div>
+                        <div class="custom-options-list">
+                            <div class="custom-option <%= (!locals.filters || !filters.skin_type || filters.skin_type === 'all') ? 'selected' : '' %>" data-value="all">Mọi loại da</div>
+                            <div class="custom-option <%= (typeof filters !== 'undefined' && filters.skin_type === 'oily') ? 'selected' : '' %>" data-value="oily">Da dầu</div>
+                            <div class="custom-option <%= (typeof filters !== 'undefined' && filters.skin_type === 'dry') ? 'selected' : '' %>" data-value="dry">Da khô</div>
+                            <div class="custom-option <%= (typeof filters !== 'undefined' && filters.skin_type === 'sensitive') ? 'selected' : '' %>" data-value="sensitive">Da nhạy cảm</div>
+                        </div>
+                        <input type="hidden" name="skin_type" value="<%= (typeof filters !== 'undefined' && filters.skin_type) ? filters.skin_type : 'all' %>">
+                    </div>
+
+                    <!-- Custom Select: Price Range -->
+                    <div class="custom-select-wrapper" id="price-range-wrapper">
+                        <div class="filter-input-unified custom-select-trigger-unified">
+                            <span><%= (typeof filters !== 'undefined' && filters.price_range === 'budget') ? 'Dưới 200k' : (typeof filters !== 'undefined' && filters.price_range === 'mid-range') ? '200k - 500k' : (typeof filters !== 'undefined' && filters.price_range === 'luxury') ? 'Trên 500k' : 'Mọi mức giá' %></span>
+                            <i data-lucide="chevron-down" size="18"></i>
+                        </div>
+                        <div class="custom-options-list">
+                            <div class="custom-option <%= (!locals.filters || !filters.price_range || filters.price_range === 'all') ? 'selected' : '' %>" data-value="all">Mọi mức giá</div>
+                            <div class="custom-option <%= (typeof filters !== 'undefined' && filters.price_range === 'budget') ? 'selected' : '' %>" data-value="budget">Dưới 200k</div>
+                            <div class="custom-option <%= (typeof filters !== 'undefined' && filters.price_range === 'mid-range') ? 'selected' : '' %>" data-value="mid-range">200k - 500k</div>
+                            <div class="custom-option <%= (typeof filters !== 'undefined' && filters.price_range === 'luxury') ? 'selected' : '' %>" data-value="luxury">Trên 500k</div>
+                        </div>
+                        <input type="hidden" name="price_range" value="<%= (typeof filters !== 'undefined' && filters.price_range) ? filters.price_range : 'all' %>">
+                    </div>
+                </div>
+            </form>
+        </section>
+
+        <div id="saved-results" style="min-height: 40vh;">
+            <% if (articles && articles.length > 0) { %>
+                <div class="articles-grid">
+                    <% articles.forEach(function(article) { %>
+                        <article class="article-card" id="saved-card-<%= article.id %>">
+                            <div class="article-thumb">
+                                <a href="/post/<%= article.slug %>">
+                                    <% if (article.thumbnail) { %>
+                                        <img src="<%= article.thumbnail %>" alt="<%= article.title %>">
+                                    <% } else { %>
+                                        <div class="no-thumb"><i data-lucide="image-off"></i></div>
+                                    <% } %>
+                                </a>
+                                <% if (article.category) { %>
+                                    <span class="card-badge"><%= article.category === 'skincare' ? 'CHĂM SÓC DA' : article.category === 'makeup' ? 'TRANG ĐIỂM' : article.category.toUpperCase() %></span>
+                                <% } %>
+                                <button class="unsave-btn" 
+                                        hx-post="/api/save/<%= article.id %>" 
+                                        hx-target="#saved-card-<%= article.id %>" 
+                                        hx-swap="delete"
+                                        title="Bỏ lưu">
+                                    <i data-lucide="bookmark" class="filled-icon"></i>
+                                </button>
+                                <div class="article-excerpt desktop-only"><%= article.excerpt || (article.content ? article.content.replace(/<[^>]*>?/gm, '').substring(0, 120) + '...' : '') %></div>
+                            </div>
+                            <div class="article-card-content">
+                                <h2><a href="/post/<%= article.slug %>"><%= article.title %></a></h2>
+                                <p class="article-excerpt-mobile mobile-only"><%= article.excerpt || (article.content ? article.content.replace(/<[^>]*>?/gm, '').substring(0, 120) + '...' : '') %></p>
+                                <div class="article-meta">
+                                    <span class="article-date"><i data-lucide="tag" size="14"></i> <%= article.skin_type === 'oily' ? 'Da dầu' : article.skin_type === 'dry' ? 'Da khô' : article.skin_type === 'sensitive' ? 'Da nhạy cảm' : 'Mọi loại da' %></span>
+                                    <span style="font-size: 0.75rem; opacity: 0.8;">Đã lưu: <%= new Date(article.saved_at).toLocaleDateString('vi-VN') %></span>
+                                </div>
+                            </div>
+                        </article>
+                    <% }); %>
+                </div>
+
+                <% if (totalPages > 1) { %>
+                    <div class="pagination-container" style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 3rem;">
+                        <% if (currentPage > 1) { %>
+                            <button class="pagination-btn" hx-get="/saved?page=1&category=<%= filters.category || '' %>&skin_type=<%= filters.skin_type || '' %>&price_range=<%= filters.price_range || '' %>&keyword=<%= filters.keyword || '' %>" hx-target="#saved-results" hx-swap="innerHTML show:window:top" hx-push-url="true" title="Trang đầu"><i data-lucide="chevrons-left"></i></button>
+                            <button class="pagination-btn" hx-get="/saved?page=<%= currentPage - 1 %>&category=<%= filters.category || '' %>&skin_type=<%= filters.skin_type || '' %>&price_range=<%= filters.price_range || '' %>&keyword=<%= filters.keyword || '' %>" hx-target="#saved-results" hx-swap="innerHTML show:window:top" hx-push-url="true" title="Trang trước"><i data-lucide="chevron-left"></i></button>
+                        <% } %>
+                        
+                        <% 
+                        let startPage = Math.max(1, currentPage - 2);
+                        let endPage = Math.min(totalPages, currentPage + 2);
+                        if (currentPage <= 3) endPage = Math.min(totalPages, 5);
+                        if (currentPage >= totalPages - 2) startPage = Math.max(1, totalPages - 4);
+                        %>
+
+                        <% if (startPage > 1) { %><button class="pagination-btn" disabled style="background: transparent; border: none; cursor: default;">...</button><% } %>
+
+                        <% for(let p = startPage; p <= endPage; p++) { %>
+                            <button class="pagination-btn <%= p === currentPage ? 'active' : '' %>" hx-get="/saved?page=<%= p %>&category=<%= filters.category || '' %>&skin_type=<%= filters.skin_type || '' %>&price_range=<%= filters.price_range || '' %>&keyword=<%= filters.keyword || '' %>" hx-target="#saved-results" hx-swap="innerHTML show:window:top" hx-push-url="true"><%= p %></button>
+                        <% } %>
+
+                        <% if (endPage < totalPages) { %><button class="pagination-btn" disabled style="background: transparent; border: none; cursor: default;">...</button><% } %>
+
+                        <% if (currentPage < totalPages) { %>
+                            <button class="pagination-btn" hx-get="/saved?page=<%= currentPage + 1 %>&category=<%= filters.category || '' %>&skin_type=<%= filters.skin_type || '' %>&price_range=<%= filters.price_range || '' %>&keyword=<%= filters.keyword || '' %>" hx-target="#saved-results" hx-swap="innerHTML show:window:top" hx-push-url="true" title="Trang sau"><i data-lucide="chevron-right"></i></button>
+                            <button class="pagination-btn" hx-get="/saved?page=<%= totalPages %>&category=<%= filters.category || '' %>&skin_type=<%= filters.skin_type || '' %>&price_range=<%= filters.price_range || '' %>&keyword=<%= filters.keyword || '' %>" hx-target="#saved-results" hx-swap="innerHTML show:window:top" hx-push-url="true" title="Trang cuối"><i data-lucide="chevrons-right"></i></button>
+                        <% } %>
+                    </div>
+                <% } %>
+            <% } else { %>
+                <div class="empty-saved">
+                    <i data-lucide="bookmark-minus" size="64"></i>
+                    <% if (filters.keyword || (filters.category && filters.category !== 'all') || (filters.skin_type && filters.skin_type !== 'all') || (filters.price_range && filters.price_range !== 'all')) { %>
+                        <h3>Không tìm thấy bài viết nào</h3>
+                        <p>Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm để tìm thấy bài viết bạn đã lưu nhé.</p>
+                        <a href="/saved" class="btn-primary" style="margin-top: 1.5rem; display: inline-flex; width: auto; text-transform: none;">
+                             Xóa bộ lọc
+                        </a>
+                    <% } else { %>
+                        <h3>Bạn chưa lưu bài viết nào</h3>
+                        <p>Hãy khám phá các bài review trên PurePick và nhấn nút "Lưu bài" để đọc lại sau nhé!</p>
+                        <a href="/" class="btn-primary" style="margin-top: 1.5rem; display: inline-flex; width: auto; text-transform: none;">
+                            <i data-lucide="home"></i> Khám phá ngay
+                        </a>
+                    <% } %>
+                </div>
+            <% } %>
+        </div>
+    </div>
+    <%- include('partials/footer') %>
+<% } %>

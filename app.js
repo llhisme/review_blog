@@ -35,8 +35,8 @@ app.use(express.json());
 app.use(session({
         secret: process.env.SESSION_SECRET || 'purepick-secret-key-fallback',
         resave: false,
-        saveUninitialized: true,
-        cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 } // 24h
+        saveUninitialized: false,
+        cookie: { secure: false } // Mặc định hết hạn khi đóng trình duyệt
 }));
 
 // Global middleware to provide SITE_URL and user session to all views
@@ -62,6 +62,10 @@ app.get('/post/:slug', homeController.post);
 
 // Trang giới thiệu
 app.get('/about', homeController.about);
+
+// Trang pháp lý
+app.get('/privacy-policy', homeController.privacyPolicy);
+app.get('/terms-of-use', homeController.termsOfUse);
 
 // Auth & User routes
 app.post('/auth/login', authController.login);

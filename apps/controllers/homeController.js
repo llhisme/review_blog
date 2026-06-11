@@ -8,8 +8,27 @@ var homeController = {
                         const { category, skin_type, price_range, keyword } = req.query;
                         const filters = { category, skin_type, price_range, keyword };
 
-                        var articles = await ArticleModel.getAllActive(filters);
-                        
+                        const page = parseInt(req.query.page) || 1;
+                        const limit = 4; // Cố định 4 bài viết trong Grid như bạn muốn test (Sau này có thể đổi thành 12)
+
+                        let queryLimit = limit;
+                        let offset = 0;
+
+                        if (page === 1) {
+                                queryLimit = limit + 1; // +1 bài cho mục "Gợi ý từ PurePick"
+                                offset = 0;
+                        } else {
+                                queryLimit = limit;
+                                offset = (limit + 1) + (page - 2) * limit;
+                        }
+
+                        const { articles, total } = await ArticleModel.getAllActive(filters, queryLimit, offset);
+
+                        let totalPages = 1;
+                        if (total > limit + 1) {
+                                totalPages = 1 + Math.ceil((total - (limit + 1)) / limit);
+                        }
+
                         // Chỉ trả về partial nếu HTMX yêu cầu đúng vùng kết quả
                         const isPartial = req.headers['hx-request'] && req.headers['hx-target'] === 'search-results';
 
@@ -18,6 +37,8 @@ var homeController = {
                                 description: 'Tìm kiếm sản phẩm chăm sóc sắc đẹp phù hợp nhất với làn da và ngân sách của bạn thông qua đánh giá chuyên gia.',
                                 articles,
                                 filters,
+                                currentPage: page,
+                                totalPages,
                                 isPartial
                         });
                 } catch (error) {
@@ -48,8 +69,8 @@ var homeController = {
                         let isSaved = false;
                         let isLiked = false;
                         if (req.session.userId) {
-                            isSaved = await UserModel.isSaved(req.session.userId, article.id);
-                            isLiked = await UserModel.isLiked(req.session.userId, article.id);
+                                isSaved = await UserModel.isSaved(req.session.userId, article.id);
+                                isLiked = await UserModel.isLiked(req.session.userId, article.id);
                         }
 
                         // Tối ưu lượt xem: Chỉ tăng view nếu chưa xem trong session này
@@ -96,6 +117,20 @@ var homeController = {
         about: (req, res) => {
                 res.render('about', {
                         title: 'Về PurePick - Hành trình Sắc đẹp'
+                });
+        },
+
+        // Trang chính sách bảo mật
+        privacyPolicy: (req, res) => {
+                res.render('privacy-policy', {
+                        title: 'Chính sách bảo mật - PurePick'
+                });
+        },
+
+        // Trang điều khoản sử dụng
+        termsOfUse: (req, res) => {
+                res.render('terms-of-use', {
+                        title: 'Điều khoản sử dụng - PurePick'
                 });
         }
 };

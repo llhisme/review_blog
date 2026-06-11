@@ -26,6 +26,14 @@ var authController = {
                 req.session.role = user.role;
                 req.session.full_name = user.full_name;
                 req.session.avatar_url = user.avatar_url;
+
+                // Xử lý Ghi nhớ đăng nhập
+                const { remember_me } = req.body;
+                if (remember_me) {
+                    req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 ngày
+                } else {
+                    req.session.cookie.expires = false; // Hết hạn khi đóng trình duyệt
+                }
                 
                 // Trả về HX-Location để HTMX thực hiện load lại trang mượt mà qua AJAX
                 res.set('HX-Location', '{"path":"' + req.get('Referrer') + '", "target":"body"}');
@@ -133,11 +141,27 @@ var authController = {
         }
 
         try {
-            const articles = await UserModel.getSavedArticles(req.session.userId);
+            const { category, skin_type, price_range, keyword } = req.query;
+            const filters = { category, skin_type, price_range, keyword };
+            
+            const page = parseInt(req.query.page) || 1;
+            const limit = 8;
+            const offset = (page - 1) * limit;
+
+            const { articles, total } = await UserModel.getSavedArticles(req.session.userId, filters, limit, offset);
+            const totalPages = Math.ceil(total / limit);
+
+            // Chỉ trả về partial nếu HTMX yêu cầu đúng vùng kết quả
+            const isPartial = req.headers['hx-request'] && req.headers['hx-target'] === 'saved-results';
+
             res.render('saved-articles', {
                 title: 'Bài viết đã lưu - PurePick',
                 articles: articles,
-                user: req.session
+                filters: filters,
+                currentPage: page,
+                totalPages: totalPages,
+                user: req.session,
+                isPartial: isPartial
             });
         } catch (error) {
             console.error(error);

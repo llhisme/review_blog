@@ -1,56 +1,101 @@
 <% if (typeof isPartial !== 'undefined' && isPartial) { %>
     <!-- HTMX PARTIAL: Chỉ trả về nội dung cốt lõi của bài viết, không bọc thêm bất kỳ thẻ nào -->
     <% if (articles.length > 0) { %>
-        <section class="featured-section">
-            <h2 class="section-title">Gợi ý từ PurePick <i data-lucide="flame" style="color: #f43f5e;"></i></h2>
-            <div class="featured-card">
-                <div class="featured-thumb">
-                    <a href="/post/<%= articles[0].slug %>">
-                        <% if (articles[0].thumbnail) { %>
-                            <img src="<%= articles[0].thumbnail %>" alt="<%= articles[0].title %>">
-                        <% } else { %>
-                            <div class="no-thumb"><i data-lucide="image-off"></i></div>
-                        <% } %>
-                    </a>
-                    <% if (articles[0].category) { %>
-                        <span class="card-badge"><%= articles[0].category === 'skincare' ? 'CHĂM SÓC DA' : articles[0].category === 'makeup' ? 'TRANG ĐIỂM' : articles[0].category.toUpperCase() %></span>
-                    <% } %>
-                    <!-- Phục hồi lớp phủ Desktop -->
-                    <div class="featured-excerpt-overlay desktop-only"><%= articles[0].excerpt || (articles[0].content ? articles[0].content.replace(/<[^>]*>?/gm, '').substring(0, 180) + '...' : '') %></div>
-                </div>
-                <div class="featured-content">
-                    <h2><a href="/post/<%= articles[0].slug %>"><%= articles[0].title %></a></h2>
-                    <!-- Thêm đoạn text Mobile nằm dưới tiêu đề -->
-                    <p class="featured-excerpt-mobile mobile-only"><%= articles[0].excerpt || (articles[0].content ? articles[0].content.replace(/<[^>]*>?/gm, '').substring(0, 180) + '...' : '') %></p>
-                    <div class="article-meta">
-                        <span class="article-date"><i data-lucide="tag" size="16"></i> <%= articles[0].skin_type === 'oily' ? 'Da dầu' : articles[0].skin_type === 'dry' ? 'Da khô' : articles[0].skin_type === 'sensitive' ? 'Da nhạy cảm' : 'Mọi loại da' %></span>
-                        <a href="/post/<%= articles[0].slug %>" class="read-more" style="display: flex;">Xem chi tiết <i data-lucide="arrow-right" size="16"></i></a>
+        <% if (currentPage === 1) { %>
+            <section class="featured-section">
+                <h2 class="section-title">Gợi ý từ PurePick <i data-lucide="flame" style="color: #f43f5e;"></i></h2>
+                <div class="featured-card">
+                    <div class="featured-thumb">
+                        <a href="/post/<%= articles[0].slug %>">
+                            <% if (articles[0].thumbnail) { %><img src="<%= articles[0].thumbnail %>" alt="<%= articles[0].title %>"><% } else { %><div class="no-thumb"><i data-lucide="image-off"></i></div><% } %>
+                        </a>
+                        <% if (articles[0].category) { %><span class="card-badge"><%= articles[0].category === 'skincare' ? 'CHĂM SÓC DA' : articles[0].category === 'makeup' ? 'TRANG ĐIỂM' : articles[0].category.toUpperCase() %></span><% } %>
+                        <div class="featured-excerpt-overlay desktop-only"><%= articles[0].excerpt || (articles[0].content ? articles[0].content.replace(/<[^>]*>?/gm, '').substring(0, 180) + '...' : '') %></div>
+                    </div>
+                    <div class="featured-content">
+                        <h2><a href="/post/<%= articles[0].slug %>"><%= articles[0].title %></a></h2>
+                        <p class="featured-excerpt-mobile mobile-only"><%= articles[0].excerpt || (articles[0].content ? articles[0].content.replace(/<[^>]*>?/gm, '').substring(0, 180) + '...' : '') %></p>
+                        <div class="article-meta">
+                            <span class="article-date"><i data-lucide="tag" size="16"></i> <%= articles[0].skin_type === 'oily' ? 'Da dầu' : articles[0].skin_type === 'dry' ? 'Da khô' : articles[0].skin_type === 'sensitive' ? 'Da nhạy cảm' : 'Mọi loại da' %></span>
+                            <a href="/post/<%= articles[0].slug %>" class="read-more" style="display: flex;">Xem chi tiết <i data-lucide="arrow-right" size="16"></i></a>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
+        <% } %>
 
-        <% if (articles.length > 1) { %>
+        <% if ((currentPage === 1 && articles.length > 1) || (currentPage > 1 && articles.length > 0)) { %>
             <section class="latest-section">
-                <h2 class="section-title">Review Mới Nhất <i data-lucide="clock" style="color: var(--primary-color);"></i></h2>
+                <% if (currentPage === 1) { %>
+                    <h2 class="section-title">Review Mới Nhất <i data-lucide="clock" style="color: var(--primary-color);"></i></h2>
+                <% } else { %>
+                    <h2 class="section-title">Trang <%= currentPage %></h2>
+                <% } %>
                 <div class="articles-grid">
-                    <% for(let i = 1; i < articles.length; i++) { const article = articles[i]; %>
+                    <% let startIndex = (currentPage === 1) ? 1 : 0; %>
+                    <% for(let i = startIndex; i < articles.length; i++) { const article = articles[i]; %>
                         <article class="article-card">
                             <div class="article-thumb">
                                 <a href="/post/<%= article.slug %>">
                                     <% if (article.thumbnail) { %><img src="<%= article.thumbnail %>" alt="<%= article.title %>"><% } else { %><div class="no-thumb"><i data-lucide="image-off"></i></div><% } %>
                                 </a>
                                 <% if (article.category) { %><span class="card-badge"><%= article.category === 'skincare' ? 'CHĂM SÓC DA' : article.category === 'makeup' ? 'TRANG ĐIỂM' : article.category.toUpperCase() %></span><% } %>
-                                <p class="article-excerpt"><%= article.excerpt || (article.content ? article.content.replace(/<[^>]*>?/gm, '').substring(0, 120) + '...' : '') %></p>
+                                <div class="article-excerpt desktop-only"><%= article.excerpt || (article.content ? article.content.replace(/<[^>]*>?/gm, '').substring(0, 120) + '...' : '') %></div>
                             </div>
                             <div class="article-card-content">
                                 <h2><a href="/post/<%= article.slug %>"><%= article.title %></a></h2>
+                                <p class="article-excerpt-mobile mobile-only"><%= article.excerpt || (article.content ? article.content.replace(/<[^>]*>?/gm, '').substring(0, 120) + '...' : '') %></p>
                                 <div class="article-meta"><span class="article-date"><i data-lucide="tag" size="16"></i> <%= article.skin_type === 'oily' ? 'Da dầu' : article.skin_type === 'dry' ? 'Da khô' : article.skin_type === 'sensitive' ? 'Da nhạy cảm' : 'Mọi loại da' %></span></div>
                             </div>
                         </article>
                     <% } %>
                 </div>
             </section>
+        <% } %>
+        
+        <% if (totalPages > 1) { %>
+            <div class="pagination-container" style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 3rem;">
+                <% if (currentPage > 1) { %>
+                    <!-- Nút về Trang Đầu -->
+                    <button class="pagination-btn" hx-get="/?page=1&category=<%= filters.category || '' %>&skin_type=<%= filters.skin_type || '' %>&price_range=<%= filters.price_range || '' %>&keyword=<%= filters.keyword || '' %>" hx-target="#search-results" hx-swap="innerHTML show:window:top" hx-push-url="true" title="Trang đầu"><i data-lucide="chevrons-left"></i></button>
+
+                    <!-- Nút Lùi 1 trang -->
+                    <button class="pagination-btn" hx-get="/?page=<%= currentPage - 1 %>&category=<%= filters.category || '' %>&skin_type=<%= filters.skin_type || '' %>&price_range=<%= filters.price_range || '' %>&keyword=<%= filters.keyword || '' %>" hx-target="#search-results" hx-swap="innerHTML show:window:top" hx-push-url="true" title="Trang trước"><i data-lucide="chevron-left"></i></button>
+                <% } %>
+
+                <!-- Rút gọn trang (Ellipsis Logic) -->
+                <% 
+                let startPage = Math.max(1, currentPage - 2);
+                let endPage = Math.min(totalPages, currentPage + 2);
+
+                if (currentPage <= 3) {
+                    endPage = Math.min(totalPages, 5);
+                }
+                if (currentPage >= totalPages - 2) {
+                    startPage = Math.max(1, totalPages - 4);
+                }
+                %>
+
+                <% if (startPage > 1) { %>
+                    <button class="pagination-btn" disabled style="background: transparent; border: none; cursor: default;">...</button>
+                <% } %>
+
+                <% for(let p = startPage; p <= endPage; p++) { %>
+                    <button class="pagination-btn <%= p === currentPage ? 'active' : '' %>" hx-get="/?page=<%= p %>&category=<%= filters.category || '' %>&skin_type=<%= filters.skin_type || '' %>&price_range=<%= filters.price_range || '' %>&keyword=<%= filters.keyword || '' %>" hx-target="#search-results" hx-swap="innerHTML show:window:top" hx-push-url="true"><%= p %></button>
+                <% } %>
+
+                <% if (endPage < totalPages) { %>
+                    <button class="pagination-btn" disabled style="background: transparent; border: none; cursor: default;">...</button>
+                <% } %>
+
+                <% if (currentPage < totalPages) { %>
+                    <!-- Nút Tiến 1 trang -->
+                    <button class="pagination-btn" hx-get="/?page=<%= currentPage + 1 %>&category=<%= filters.category || '' %>&skin_type=<%= filters.skin_type || '' %>&price_range=<%= filters.price_range || '' %>&keyword=<%= filters.keyword || '' %>" hx-target="#search-results" hx-swap="innerHTML show:window:top" hx-push-url="true" title="Trang sau"><i data-lucide="chevron-right"></i></button>
+
+                    <!-- Nút Tới Trang Cuối -->
+                    <button class="pagination-btn" hx-get="/?page=<%= totalPages %>&category=<%= filters.category || '' %>&skin_type=<%= filters.skin_type || '' %>&price_range=<%= filters.price_range || '' %>&keyword=<%= filters.keyword || '' %>" hx-target="#search-results" hx-swap="innerHTML show:window:top" hx-push-url="true" title="Trang cuối"><i data-lucide="chevrons-right"></i></button>
+                <% } %>
+            </div>
         <% } %>
     <% } else { %>
         <div class="empty-state glass" style="padding: 5rem; border-radius: var(--radius);">
@@ -110,7 +155,7 @@
     <div class="container">
         <section class="compact-filter-section" id="compact-filter-section" hx-preserve="true">
             <form action="/" method="GET" id="filter-form"
-                  hx-get="/" hx-trigger="submit, change, keyup from:#keyword-search-unified delay:400ms changed" 
+                  hx-get="/" hx-trigger="submit, keyup from:#keyword-search-unified delay:400ms changed" 
                   hx-target="#search-results" hx-swap="innerHTML show:no-scroll" hx-push-url="true">
                 <input type="hidden" name="category" id="hidden-category-input" value="<%= (typeof filters !== 'undefined' && filters.category) ? filters.category : 'all' %>">
                 
@@ -164,31 +209,39 @@
         <!-- ĐÍCH ĐẾN DUY NHẤT CỦA MỌI BỘ LỌC -->
         <div id="search-results" style="min-height: 60vh;">
             <% if (articles.length > 0) { %>
-                <section class="featured-section">
-                    <h2 class="section-title">Gợi ý từ PurePick <i data-lucide="flame" style="color: #f43f5e;"></i></h2>
-                    <div class="featured-card">
-                        <div class="featured-thumb">
-                            <a href="/post/<%= articles[0].slug %>">
-                                <% if (articles[0].thumbnail) { %><img src="<%= articles[0].thumbnail %>" alt="<%= articles[0].title %>"><% } else { %><div class="no-thumb"><i data-lucide="image-off"></i></div><% } %>
-                            </a>
-                            <% if (articles[0].category) { %><span class="card-badge"><%= articles[0].category === 'skincare' ? 'CHĂM SÓC DA' : articles[0].category === 'makeup' ? 'TRANG ĐIỂM' : articles[0].category.toUpperCase() %></span><% } %>
-                            <div class="featured-excerpt-overlay desktop-only"><%= articles[0].excerpt || (articles[0].content ? articles[0].content.replace(/<[^>]*>?/gm, '').substring(0, 180) + '...' : '') %></div>
-                        </div>
-                        <div class="featured-content">
-                            <h2><a href="/post/<%= articles[0].slug %>"><%= articles[0].title %></a></h2>
-                            <p class="featured-excerpt-mobile mobile-only"><%= articles[0].excerpt || (articles[0].content ? articles[0].content.replace(/<[^>]*>?/gm, '').substring(0, 180) + '...' : '') %></p>
-                            <div class="article-meta">
-                                <span class="article-date"><i data-lucide="tag" size="16"></i> <%= articles[0].skin_type === 'oily' ? 'Da dầu' : articles[0].skin_type === 'dry' ? 'Da khô' : articles[0].skin_type === 'sensitive' ? 'Da nhạy cảm' : 'Mọi loại da' %></span>
-                                <a href="/post/<%= articles[0].slug %>" class="read-more" style="display: flex;">Xem chi tiết <i data-lucide="arrow-right" size="16"></i></a>
+                <% if (currentPage === 1) { %>
+                    <section class="featured-section">
+                        <h2 class="section-title">Gợi ý từ PurePick <i data-lucide="flame" style="color: #f43f5e;"></i></h2>
+                        <div class="featured-card">
+                            <div class="featured-thumb">
+                                <a href="/post/<%= articles[0].slug %>">
+                                    <% if (articles[0].thumbnail) { %><img src="<%= articles[0].thumbnail %>" alt="<%= articles[0].title %>"><% } else { %><div class="no-thumb"><i data-lucide="image-off"></i></div><% } %>
+                                </a>
+                                <% if (articles[0].category) { %><span class="card-badge"><%= articles[0].category === 'skincare' ? 'CHĂM SÓC DA' : articles[0].category === 'makeup' ? 'TRANG ĐIỂM' : articles[0].category.toUpperCase() %></span><% } %>
+                                <div class="featured-excerpt-overlay desktop-only"><%= articles[0].excerpt || (articles[0].content ? articles[0].content.replace(/<[^>]*>?/gm, '').substring(0, 180) + '...' : '') %></div>
+                            </div>
+                            <div class="featured-content">
+                                <h2><a href="/post/<%= articles[0].slug %>"><%= articles[0].title %></a></h2>
+                                <p class="featured-excerpt-mobile mobile-only"><%= articles[0].excerpt || (articles[0].content ? articles[0].content.replace(/<[^>]*>?/gm, '').substring(0, 180) + '...' : '') %></p>
+                                <div class="article-meta">
+                                    <span class="article-date"><i data-lucide="tag" size="16"></i> <%= articles[0].skin_type === 'oily' ? 'Da dầu' : articles[0].skin_type === 'dry' ? 'Da khô' : articles[0].skin_type === 'sensitive' ? 'Da nhạy cảm' : 'Mọi loại da' %></span>
+                                    <a href="/post/<%= articles[0].slug %>" class="read-more" style="display: flex;">Xem chi tiết <i data-lucide="arrow-right" size="16"></i></a>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </section>
-                <% if (articles.length > 1) { %>
+                    </section>
+                <% } %>
+
+                <% if ((currentPage === 1 && articles.length > 1) || (currentPage > 1 && articles.length > 0)) { %>
                     <section class="latest-section">
-                        <h2 class="section-title">Review Mới Nhất <i data-lucide="clock" style="color: var(--primary-color);"></i></h2>
+                        <% if (currentPage === 1) { %>
+                            <h2 class="section-title">Review Mới Nhất <i data-lucide="clock" style="color: var(--primary-color);"></i></h2>
+                        <% } else { %>
+                            <h2 class="section-title">Trang <%= currentPage %></h2>
+                        <% } %>
                         <div class="articles-grid">
-                            <% for(let i = 1; i < articles.length; i++) { const article = articles[i]; %>
+                            <% let startIndex = (currentPage === 1) ? 1 : 0; %>
+                            <% for(let i = startIndex; i < articles.length; i++) { const article = articles[i]; %>
                                 <article class="article-card">
                                     <div class="article-thumb">
                                         <a href="/post/<%= article.slug %>">
@@ -207,6 +260,52 @@
                         </div>
                     </section>
                 <% } %>
+                
+                <% if (totalPages > 1) { %>
+                    <div class="pagination-container" style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 3rem;">
+                        <% if (currentPage > 1) { %>
+                            <!-- Nút về Trang Đầu -->
+                            <button class="pagination-btn" hx-get="/?page=1&category=<%= filters.category || '' %>&skin_type=<%= filters.skin_type || '' %>&price_range=<%= filters.price_range || '' %>&keyword=<%= filters.keyword || '' %>" hx-target="#search-results" hx-swap="innerHTML show:window:top" hx-push-url="true" title="Trang đầu"><i data-lucide="chevrons-left"></i></button>
+
+                            <!-- Nút Lùi 1 trang -->
+                            <button class="pagination-btn" hx-get="/?page=<%= currentPage - 1 %>&category=<%= filters.category || '' %>&skin_type=<%= filters.skin_type || '' %>&price_range=<%= filters.price_range || '' %>&keyword=<%= filters.keyword || '' %>" hx-target="#search-results" hx-swap="innerHTML show:window:top" hx-push-url="true" title="Trang trước"><i data-lucide="chevron-left"></i></button>
+                        <% } %>
+                        
+                        <!-- Rút gọn trang (Ellipsis Logic) -->
+                        <% 
+                        let startPage = Math.max(1, currentPage - 2);
+                        let endPage = Math.min(totalPages, currentPage + 2);
+
+                        if (currentPage <= 3) {
+                            endPage = Math.min(totalPages, 5);
+                        }
+                        if (currentPage >= totalPages - 2) {
+                            startPage = Math.max(1, totalPages - 4);
+                        }
+                        %>
+
+                        <% if (startPage > 1) { %>
+                            <button class="pagination-btn" disabled style="background: transparent; border: none; cursor: default;">...</button>
+                        <% } %>
+
+                        <% for(let p = startPage; p <= endPage; p++) { %>
+                            <button class="pagination-btn <%= p === currentPage ? 'active' : '' %>" hx-get="/?page=<%= p %>&category=<%= filters.category || '' %>&skin_type=<%= filters.skin_type || '' %>&price_range=<%= filters.price_range || '' %>&keyword=<%= filters.keyword || '' %>" hx-target="#search-results" hx-swap="innerHTML show:window:top" hx-push-url="true"><%= p %></button>
+                        <% } %>
+
+                        <% if (endPage < totalPages) { %>
+                            <button class="pagination-btn" disabled style="background: transparent; border: none; cursor: default;">...</button>
+                        <% } %>
+
+                        <% if (currentPage < totalPages) { %>
+                            <!-- Nút Tiến 1 trang -->
+                            <button class="pagination-btn" hx-get="/?page=<%= currentPage + 1 %>&category=<%= filters.category || '' %>&skin_type=<%= filters.skin_type || '' %>&price_range=<%= filters.price_range || '' %>&keyword=<%= filters.keyword || '' %>" hx-target="#search-results" hx-swap="innerHTML show:window:top" hx-push-url="true" title="Trang sau"><i data-lucide="chevron-right"></i></button>
+
+                            <!-- Nút Tới Trang Cuối -->
+                            <button class="pagination-btn" hx-get="/?page=<%= totalPages %>&category=<%= filters.category || '' %>&skin_type=<%= filters.skin_type || '' %>&price_range=<%= filters.price_range || '' %>&keyword=<%= filters.keyword || '' %>" hx-target="#search-results" hx-swap="innerHTML show:window:top" hx-push-url="true" title="Trang cuối"><i data-lucide="chevrons-right"></i></button>
+                        <% } %>
+                    </div>
+                <% } %>
+                
             <% } else { %>
                 <div class="empty-state glass" style="padding: 5rem; border-radius: var(--radius);">
                     <i data-lucide="frown" size="48" style="color: var(--text-muted); margin-bottom: 1rem;"></i>

@@ -47,7 +47,8 @@
             <div class="post-footer">
                 <div class="action-buttons" style="display: flex; gap: 1rem; flex-wrap: wrap;">
                     <a href="https://www.facebook.com/sharer/sharer.php?u=<%= encodeURIComponent((typeof SITE_URL !== 'undefined' ? SITE_URL : 'http://localhost:3000') + '/post/' + article.slug) %>" target="_blank" class="share-btn">
-                        <i data-lucide="facebook"></i> Chia sẻ
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+                        <span>Chia sẻ</span>
                     </a>
                     
                     <button class="action-btn <%= isLiked ? 'active' : '' %>" hx-post="/api/like/<%= article.id %>" hx-swap="outerHTML">

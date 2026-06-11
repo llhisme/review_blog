@@ -835,6 +835,36 @@ a.user-dropdown-header:hover {
     align-items: center;
 }
 
+/* Pagination */
+.pagination-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: white;
+    border: 1px solid var(--glass-border);
+    color: var(--text-color);
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-sm);
+}
+
+.pagination-btn:hover {
+    background: var(--primary-light);
+    color: white;
+    border-color: var(--primary-light);
+}
+
+.pagination-btn.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+}
+
 /* CTA Buttons */
 .affiliate-btn {
     display: inline-flex;
@@ -1006,6 +1036,12 @@ a.user-dropdown-header:hover {
     color: white;
     text-decoration: none;
     transition: all 0.3s;
+}
+
+.social-btn svg, .social-btn i {
+    width: 20px;
+    height: 20px;
+    display: block !important; /* Tránh bị Adblocker ẩn đi */
 }
 
 .social-btn:hover {

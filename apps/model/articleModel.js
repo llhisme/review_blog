@@ -18,32 +18,52 @@ var ArticleModel = {
                 return rows;
         },
 
-        // Lấy bài viết đang hoạt động (Cho trang chủ)
-        getAllActive: async (filters = {}) => {
+        // Lấy bài viết đang hoạt động (Cho trang chủ, có phân trang và lọc tips)
+        getAllActive: async (filters = {}, limit = 12, offset = 0) => {
                 let query = 'SELECT id, title, slug, excerpt, thumbnail, created_at, category, skin_type, price_range FROM articles WHERE status = $1';
+                let countQuery = 'SELECT COUNT(*) FROM articles WHERE status = $1';
                 let params = ['active'];
                 let counter = 2;
 
                 if (filters.category && filters.category !== 'all') {
-                        query += ` AND category = $${counter++}`;
+                        query += ` AND category = $${counter}`;
+                        countQuery += ` AND category = $${counter}`;
                         params.push(filters.category);
-                }
-                if (filters.skin_type && filters.skin_type !== 'all') {
-                        query += ` AND skin_type = $${counter++}`;
-                        params.push(filters.skin_type);
-                }
-                if (filters.price_range && filters.price_range !== 'all') {
-                        query += ` AND price_range = $${counter++}`;
-                        params.push(filters.price_range);
-                }
-                if (filters.keyword && filters.keyword.trim() !== '') {
-                        query += ` AND title ILIKE $${counter++}`;
-                        params.push(`%${filters.keyword}%`);
+                        counter++;
+                } else {
+                        // Mặc định ẩn bài viết chuyên mục 'tips' ở trang chủ
+                        query += ` AND (category != 'tips' OR category IS NULL)`;
+                        countQuery += ` AND (category != 'tips' OR category IS NULL)`;
                 }
 
-                query += ' ORDER BY id DESC';
-                const { rows } = await db.query(query, params);
-                return rows;
+                if (filters.skin_type && filters.skin_type !== 'all') {
+                        query += ` AND skin_type = $${counter}`;
+                        countQuery += ` AND skin_type = $${counter}`;
+                        params.push(filters.skin_type);
+                        counter++;
+                }
+                if (filters.price_range && filters.price_range !== 'all') {
+                        query += ` AND price_range = $${counter}`;
+                        countQuery += ` AND price_range = $${counter}`;
+                        params.push(filters.price_range);
+                        counter++;
+                }
+                if (filters.keyword && filters.keyword.trim() !== '') {
+                        query += ` AND title ILIKE $${counter}`;
+                        countQuery += ` AND title ILIKE $${counter}`;
+                        params.push(`%${filters.keyword}%`);
+                        counter++;
+                }
+
+                query += ` ORDER BY id DESC LIMIT $${counter} OFFSET $${counter + 1}`;
+                
+                const { rows: articles } = await db.query(query, [...params, limit, offset]);
+                const { rows: countRows } = await db.query(countQuery, params);
+                
+                return { 
+                    articles, 
+                    total: parseInt(countRows[0].count) 
+                };
         },
 
         // Lấy bài viết theo slug

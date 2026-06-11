@@ -56,6 +56,15 @@ const adminController = {
 
                         if (users.length > 0) {
                                 const user = users[0];
+                                
+                                // Kiểm tra quyền admin
+                                if (user.role !== 'admin') {
+                                        return res.render('admin/login', {
+                                                title: 'Đăng nhập Quản trị',
+                                                error: 'Bạn không có quyền truy cập vào khu vực này!'
+                                        });
+                                }
+
                                 // Kiểm tra xem mật khẩu có phải dạng hash không (bcrypt hash dài 60 ký tự)
                                 let isMatch = false;
                                 if (user.password.length === 60 || user.password.startsWith('$2')) {
@@ -67,7 +76,11 @@ const adminController = {
                                 
                                 if (isMatch) {
                                         req.session.isAdmin = true;
-                                        req.session.username = username;
+                                        req.session.userId = user.id;
+                                        req.session.username = user.username;
+                                        req.session.role = user.role;
+                                        req.session.full_name = user.full_name;
+                                        req.session.avatar_url = user.avatar_url;
                                         res.redirect('/admin/dashboard');
                                         return;
                                 }
