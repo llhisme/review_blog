@@ -5,7 +5,7 @@
             <section class="featured-section">
                 <h2 class="section-title">Gợi ý từ PurePick <i data-lucide="flame" style="color: #f43f5e;"></i></h2>
                 <div class="featured-card">
-                    <div class="featured-thumb">
+                    <div class="featured-thumb" style="--bg-img: url('<%= articles[0].thumbnail %>')">
                         <a href="/post/<%= articles[0].slug %>">
                             <% if (articles[0].thumbnail) { %><img src="<%= articles[0].thumbnail %>" alt="<%= articles[0].title %>"><% } else { %><div class="no-thumb"><i data-lucide="image-off"></i></div><% } %>
                         </a>
@@ -35,7 +35,7 @@
                     <% let startIndex = (currentPage === 1) ? 1 : 0; %>
                     <% for(let i = startIndex; i < articles.length; i++) { const article = articles[i]; %>
                         <article class="article-card">
-                            <div class="article-thumb">
+                            <div class="article-thumb" style="--bg-img: url('<%= article.thumbnail %>')">
                                 <a href="/post/<%= article.slug %>">
                                     <% if (article.thumbnail) { %><img src="<%= article.thumbnail %>" alt="<%= article.title %>"><% } else { %><div class="no-thumb"><i data-lucide="image-off"></i></div><% } %>
                                 </a>
@@ -213,7 +213,7 @@
                     <section class="featured-section">
                         <h2 class="section-title">Gợi ý từ PurePick <i data-lucide="flame" style="color: #f43f5e;"></i></h2>
                         <div class="featured-card">
-                            <div class="featured-thumb">
+                            <div class="featured-thumb" style="--bg-img: url('<%= articles[0].thumbnail %>')">
                                 <a href="/post/<%= articles[0].slug %>">
                                     <% if (articles[0].thumbnail) { %><img src="<%= articles[0].thumbnail %>" alt="<%= articles[0].title %>"><% } else { %><div class="no-thumb"><i data-lucide="image-off"></i></div><% } %>
                                 </a>
@@ -243,7 +243,7 @@
                             <% let startIndex = (currentPage === 1) ? 1 : 0; %>
                             <% for(let i = startIndex; i < articles.length; i++) { const article = articles[i]; %>
                                 <article class="article-card">
-                                    <div class="article-thumb">
+                                    <div class="article-thumb" style="--bg-img: url('<%= article.thumbnail %>')">
                                         <a href="/post/<%= article.slug %>">
                                             <% if (article.thumbnail) { %><img src="<%= article.thumbnail %>" alt="<%= article.title %>"><% } else { %><div class="no-thumb"><i data-lucide="image-off"></i></div><% } %>
                                         </a>

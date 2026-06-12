@@ -70,6 +70,43 @@
         </article>
     </div>
 
+    <!-- MỤC BÌNH LUẬN -->
+    <section class="comments-section" style="max-width: 800px; margin: 4rem auto 0; padding-top: 3rem; border-top: 1px solid #e2e8f0;">
+        <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i data-lucide="message-square" style="color: var(--primary-color);"></i> Bình luận (<%= typeof totalComments !== 'undefined' ? totalComments : 0 %>)
+        </h3>
+
+        <!-- Form nhập bình luận gốc -->
+        <div class="comment-input-area">
+            <% if (locals.user) { %>
+                <div class="comment-form-wrapper">
+                    <img src="<%= locals.user.avatar_url %>" alt="Avatar" class="comment-avatar">
+                    <form class="comment-form" hx-post="/api/comments/<%= article.id %>" hx-swap="afterbegin" hx-target="#comments-list" onsubmit="setTimeout(() => this.reset(), 10)">
+                        <textarea name="content" placeholder="Chia sẻ suy nghĩ của bạn về sản phẩm này..." required rows="3"></textarea>
+                        <div class="comment-form-footer">
+                            <button type="submit" class="comment-submit-btn">Gửi bình luận <i data-lucide="send" size="16"></i></button>
+                        </div>
+                    </form>
+                </div>
+            <% } else { %>
+                <div class="comment-login-prompt glass">
+                    <i data-lucide="lock" size="32" style="color: var(--text-muted); margin-bottom: 1rem;"></i>
+                    <p style="font-weight: 600; margin-bottom: 1rem;">Vui lòng đăng nhập để tham gia thảo luận cùng cộng đồng PurePick.</p>
+                    <button class="btn-primary" onclick="openAuthModal()" style="display: inline-flex;"><i data-lucide="user"></i> Đăng nhập ngay</button>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Danh sách bình luận -->
+        <div class="comments-list" id="comments-list">
+            <% if (comments && comments.length > 0) { %>
+                <%- include('partials/comments-chunk', { comments: comments, articleId: article.id, hasMoreParents: hasMoreParents, nextParentOffset: 5 }) %>
+            <% } else { %>
+                <p id="no-comments-msg" style="text-align: center; color: var(--text-muted); padding: 2rem 0; font-style: italic;">Chưa có bình luận nào. Hãy là người đầu tiên chia sẻ cảm nhận nhé!</p>
+            <% } %>
+        </div>
+    </section>
+
     <!-- Related Articles -->
     <% if (typeof relatedArticles !== 'undefined' && relatedArticles.length > 0) { %>
     <section class="related-section" style="margin-top: 5rem; border-top: 1px solid #e2e8f0; padding-top: 3rem; margin-bottom: 6rem;">
@@ -77,7 +114,7 @@
         <div class="articles-grid">
             <% relatedArticles.forEach(function(rel) { %>
             <article class="article-card">
-                <div class="article-thumb">
+                <div class="article-thumb" style="--bg-img: url('<%= rel.thumbnail %>')">
                     <a href="/post/<%= rel.slug %>">
                         <% if (rel.thumbnail) { %>
                             <img src="<%= rel.thumbnail %>" alt="<%= rel.title %>">
@@ -109,6 +146,67 @@
 </div>
 
 <script>
+    // Logic cho phần bình luận
+    function toggleCommentOptions(commentId) {
+        const dropdown = document.getElementById(`comment-options-${commentId}`);
+        if (dropdown) {
+            // Đóng tất cả các dropdown khác trước khi mở
+            document.querySelectorAll('.comment-dropdown').forEach(d => {
+                if (d.id !== `comment-options-${commentId}`) {
+                    d.style.display = 'none';
+                }
+            });
+            
+            if (dropdown.style.display === 'none' || dropdown.style.display === '') {
+                dropdown.style.display = 'block';
+            } else {
+                dropdown.style.display = 'none';
+            }
+        }
+    }
+
+    // Đóng dropdown khi click ra ngoài
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.comment-options-wrapper')) {
+            document.querySelectorAll('.comment-dropdown').forEach(d => {
+                d.style.display = 'none';
+            });
+        }
+    });
+
+    function toggleReplyForm(commentId) {
+        const formContainer = document.getElementById(`reply-form-${commentId}`);
+        if (formContainer) {
+            if (formContainer.style.display === 'none' || formContainer.style.display === '') {
+                formContainer.style.display = 'block';
+                formContainer.querySelector('textarea').focus();
+            } else {
+                formContainer.style.display = 'none';
+            }
+        } else {
+            // Nếu chưa đăng nhập, mở modal đăng nhập
+            if (typeof openAuthModal === 'function') {
+                openAuthModal();
+            }
+        }
+    }
+
+    function toggleEditForm(commentId) {
+        const textElement = document.getElementById(`comment-text-${commentId}`);
+        const formElement = document.getElementById(`edit-form-${commentId}`);
+        
+        if (textElement && formElement) {
+            if (formElement.style.display === 'none' || formElement.style.display === '') {
+                textElement.style.display = 'none';
+                formElement.style.display = 'block';
+                formElement.querySelector('textarea').focus();
+            } else {
+                textElement.style.display = 'block';
+                formElement.style.display = 'none';
+            }
+        }
+    }
+
     function initToc() {
         const articleContent = document.getElementById('article-content');
         const tocList = document.getElementById('toc-list');

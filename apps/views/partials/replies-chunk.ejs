@@ -1,0 +1,14 @@
+<% replies.forEach(function(reply) { %>
+    <%- include('comment-item', { comment: reply, isReply: true }) %>
+<% }); %>
+
+<!-- Nút Load More Replies cho Chunk tiếp theo -->
+<% if (typeof hasMoreReplies !== 'undefined' && hasMoreReplies) { %>
+    <button id="load-more-replies-<%= parentId %>" class="btn-reply load-more-btn" style="margin-left: 3rem; margin-top: 0.5rem; display: flex; align-items: center; gap: 0.3rem;" hx-get="/api/comments/replies/<%= parentId %>?offset=<%= nextReplyOffset %>" hx-target="this" hx-swap="outerHTML">
+        <i data-lucide="corner-down-right" size="14"></i> Xem thêm phản hồi...
+    </button>
+<% } %>
+
+<script>
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+</script>

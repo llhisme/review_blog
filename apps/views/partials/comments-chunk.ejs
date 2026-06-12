@@ -1,0 +1,13 @@
+<% comments.forEach(function(comment) { %>
+    <%- include('comment-thread', { comment: comment, articleId: articleId }) %>
+<% }); %>
+
+<% if (typeof hasMoreParents !== 'undefined' && hasMoreParents) { %>
+    <button id="load-more-parents" class="btn-cancel load-more-btn" style="width: 100%; text-align: center; margin-top: 1.5rem;" hx-get="/api/comments/<%= articleId %>/more?offset=<%= nextParentOffset %>" hx-target="this" hx-swap="outerHTML">
+        Xem thêm bình luận
+    </button>
+<% } %>
+
+<script>
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+</script>

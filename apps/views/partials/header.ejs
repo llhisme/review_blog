@@ -54,6 +54,26 @@
 
                                 <div class="user-actions">
                                         <% if (locals.user) { %>
+                                            <!-- Notifications -->
+                                            <div class="notifications-wrapper" id="notifications-wrapper">
+                                                <button class="notifications-btn" onclick="toggleNotifications(event)">
+                                                    <i data-lucide="bell" size="20"></i>
+                                                    <span class="notification-badge"></span>
+                                                </button>
+                                                <div class="notifications-dropdown" id="notifications-dropdown">
+                                                    <div class="notifications-header">
+                                                        <h3>Thông báo</h3>
+                                                        <button class="mark-all-read">Đánh dấu đã đọc</button>
+                                                    </div>
+                                                    <div class="notifications-list" id="notifications-list">
+                                                        <div class="notification-empty">
+                                                            <i data-lucide="bell-off" size="32"></i>
+                                                            <p>Bạn không có thông báo nào mới</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                             <div class="user-profile-wrapper" id="user-profile-wrapper">
                                                 <button class="user-profile-btn" onclick="toggleUserDropdown(event)">
                                                     <img src="<%= locals.user.avatar_url %>" alt="Avatar" class="user-avatar">
@@ -86,6 +106,18 @@
                     if (e) e.stopPropagation();
                     document.getElementById('user-dropdown').classList.toggle('active');
                     document.querySelector('.user-profile-btn').classList.toggle('active');
+                    // Đóng dropdown thông báo nếu đang mở
+                    const notifDropdown = document.getElementById('notifications-dropdown');
+                    if (notifDropdown) notifDropdown.classList.remove('active');
+                }
+
+                // Notification Dropdown Logic
+                function toggleNotifications(e) {
+                    if (e) e.stopPropagation();
+                    document.getElementById('notifications-dropdown').classList.toggle('active');
+                    // Đóng dropdown user nếu đang mở
+                    document.getElementById('user-dropdown').classList.remove('active');
+                    document.querySelector('.user-profile-btn').classList.remove('active');
                 }
 
                 // Đóng dropdown khi click ra ngoài
@@ -95,6 +127,12 @@
                     if (dropdown && profileBtn && !dropdown.contains(e.target) && !profileBtn.contains(e.target)) {
                         dropdown.classList.remove('active');
                         profileBtn.classList.remove('active');
+                    }
+
+                    const notifDropdown = document.getElementById('notifications-dropdown');
+                    const notifBtn = document.querySelector('.notifications-btn');
+                    if (notifDropdown && notifBtn && !notifDropdown.contains(e.target) && !notifBtn.contains(e.target)) {
+                        notifDropdown.classList.remove('active');
                     }
                 });
 

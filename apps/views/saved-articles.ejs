@@ -4,7 +4,7 @@
         <div class="articles-grid">
             <% articles.forEach(function(article) { %>
                 <article class="article-card" id="saved-card-<%= article.id %>">
-                    <div class="article-thumb">
+                    <div class="article-thumb" style="background-image: url('<%= article.thumbnail %>')">
                         <a href="/post/<%= article.slug %>">
                             <% if (article.thumbnail) { %>
                                 <img src="<%= article.thumbnail %>" alt="<%= article.title %>">
@@ -204,7 +204,7 @@
                 <div class="articles-grid">
                     <% articles.forEach(function(article) { %>
                         <article class="article-card" id="saved-card-<%= article.id %>">
-                            <div class="article-thumb">
+                            <div class="article-thumb" style="background-image: url('<%= article.thumbnail %>')">
                                 <a href="/post/<%= article.slug %>">
                                     <% if (article.thumbnail) { %>
                                         <img src="<%= article.thumbnail %>" alt="<%= article.title %>">

@@ -1,0 +1,58 @@
+<div class="comment-item <%= isReply ? 'comment-reply' : '' %>" id="comment-<%= comment.id %>">
+    <img src="<%= comment.avatar_url %>" alt="Avatar" class="comment-avatar">
+    <div class="comment-content-box">
+        <div class="comment-header">
+            <strong><%= comment.full_name || comment.username %></strong>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span class="comment-date"><%= timeAgo(comment.created_at) %></span>
+                <div class="comment-options-wrapper" style="position: relative;">
+                    <button class="btn-icon-only" onclick="toggleCommentOptions(<%= comment.id %>)" style="background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 0.2rem;"><i data-lucide="more-vertical" size="16"></i></button>
+                    <div class="comment-dropdown" id="comment-options-<%= comment.id %>" style="display: none; position: absolute; right: 0; top: 100%; background: white; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 10; min-width: 120px; overflow: hidden;">
+                        <% if (locals.user && locals.user.id === comment.user_id) { %>
+                            <button class="comment-dropdown-btn" onclick="toggleEditForm(<%= comment.id %>); toggleCommentOptions(<%= comment.id %>)"><i data-lucide="edit-2" size="14"></i> Sửa</button>
+                            <button class="comment-dropdown-btn danger" hx-delete="/api/comments/<%= comment.id %>" hx-target="<%= isReply ? '#comment-' + comment.id : '#thread-' + comment.id %>" hx-swap="outerHTML swap:0.3s" hx-confirm="Bạn có chắc chắn muốn xóa bình luận này?"><i data-lucide="trash-2" size="14"></i> Xóa</button>
+                        <% } else { %>
+                            <button class="comment-dropdown-btn danger" 
+                                <% if (locals.user) { %>
+                                    hx-post="/api/comments/<%= comment.id %>/report" hx-swap="none" onclick="toggleCommentOptions(<%= comment.id %>); alert('Đã gửi báo cáo thành công!');"
+                                <% } else { %>
+                                    onclick="openAuthModal()"
+                                <% } %>
+                            >
+                                <i data-lucide="flag" size="14"></i> Báo cáo
+                            </button>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="comment-text-<%= comment.id %>">
+            <p class="comment-text"><%= comment.content %></p>
+        </div>
+        <!-- Form sửa bình luận (ẩn) -->
+        <form id="edit-form-<%= comment.id %>" class="comment-form" style="display: none; margin-bottom: 1rem;" 
+              hx-put="/api/comments/<%= comment.id %>" 
+              hx-target="#comment-text-<%= comment.id %>" 
+              hx-swap="innerHTML"
+              onsubmit="toggleEditForm(<%= comment.id %>)">
+            <textarea name="content" required rows="2"><%= comment.content %></textarea>
+            <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.5rem;">
+                <button type="button" class="btn-cancel" onclick="toggleEditForm(<%= comment.id %>)">Hủy</button>
+                <button type="submit" class="btn-primary btn-sm">Lưu</button>
+            </div>
+        </form>
+        <div class="comment-actions">
+            <button class="btn-reply" 
+                <% if (locals.user) { %>
+                    hx-post="/api/comments/<%= comment.id %>/like" hx-swap="outerHTML"
+                <% } else { %>
+                    onclick="openAuthModal()"
+                <% } %>
+            >
+                <i data-lucide="heart" size="14" class="<%= comment.is_liked ? 'filled-icon' : '' %>" style="<%= comment.is_liked ? 'color: #e11d48;' : '' %>"></i>
+                <span class="like-count"><%= comment.like_count > 0 ? comment.like_count : 'Thích' %></span>
+            </button>
+            <button class="btn-reply" onclick="toggleReplyForm(<%= isReply ? comment.parent_id : comment.id %>)">Phản hồi</button>
+        </div>
+    </div>
+</div>

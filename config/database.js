@@ -1,5 +1,11 @@
-const { Pool } = require('pg');
+const { Pool, types } = require('pg');
 require('dotenv').config();
+
+// Cấu hình thư viện pg luôn biên dịch trường TIMESTAMP (OID 1114) thành giờ UTC (Thêm 'Z' vào cuối chuỗi)
+// Điều này ngăn chặn lỗi "lệch múi giờ" bất kể server hay database được đặt ở đâu trên thế giới.
+types.setTypeParser(1114, function(stringValue) {
+  return new Date(stringValue + 'Z');
+});
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,

@@ -28,6 +28,37 @@ const SITE_URL = process.env.SITE_URL || `http://localhost:${PORT}`;
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'apps/views'));
 
+// EJS Helper: Time Ago (Xử lý múi giờ Việt Nam)
+app.locals.timeAgo = function(dateInput) {
+    if (!dateInput) return '';
+    
+    // Vì thư viện pg đã được cấu hình parse đúng chuẩn UTC, ta có thể dùng trực tiếp
+    const date = new Date(dateInput);
+    const now = new Date();
+    
+    const diffInSeconds = Math.floor((now - date) / 1000);
+    
+    if (diffInSeconds < 60) return 'Vừa xong';
+    
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    if (diffInMinutes < 60) return `${diffInMinutes} phút trước`;
+    
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `${diffInHours} giờ trước`;
+    
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays <= 3) return `${diffInDays} ngày trước`;
+    
+    return date.toLocaleString('vi-VN', { 
+        timeZone: 'Asia/Ho_Chi_Minh',
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric', 
+        hour: '2-digit', 
+        minute: '2-digit' 
+    });
+};
+
 // Middleware
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
@@ -75,11 +106,18 @@ app.get('/saved', authController.savedArticlesPage);
 app.get('/profile', authController.profilePage);
 app.post('/api/profile', upload.single('avatar'), authController.updateProfile);
 
-// API User Interactions
+// User Actions
 app.post('/api/save/:id', authController.toggleSave);
 app.post('/api/like/:id', authController.toggleLike);
+app.post('/api/comments/:articleId', homeController.postComment);
+app.get('/api/comments/:articleId/more', homeController.loadMoreComments);
+app.get('/api/comments/replies/:parentId', homeController.loadMoreReplies);
+app.put('/api/comments/:id', homeController.updateComment);
+app.delete('/api/comments/:id', homeController.deleteComment);
+app.post('/api/comments/:id/like', homeController.toggleCommentLike);
+app.post('/api/comments/:id/report', homeController.reportComment);
 
-// API Tracking
+// Tracking
 app.post('/api/track-click/:id', homeController.trackClick);
 
 // Admin - Đăng nhập
