@@ -117,6 +117,12 @@ app.delete('/api/comments/:id', homeController.deleteComment);
 app.post('/api/comments/:id/like', homeController.toggleCommentLike);
 app.post('/api/comments/:id/report', homeController.reportComment);
 
+// Notifications
+app.get('/api/notifications', homeController.getNotifications);
+app.get('/api/notifications/unread-count', homeController.getUnreadCount);
+app.post('/api/notifications/:id/read', homeController.readNotification);
+app.post('/api/notifications/read-all', homeController.readAllNotifications);
+
 // Tracking
 app.post('/api/track-click/:id', homeController.trackClick);
 

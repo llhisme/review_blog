@@ -747,11 +747,13 @@
     flex-direction: column;
     gap: 0.8rem;
     animation: fadeIn 0.4s ease-out;
+    scroll-margin-top: 120px; /* Chống bị Header che khi cuộn tới */
 }
 
 .comment-item {
     display: flex;
     gap: 1.25rem;
+    scroll-margin-top: 120px; /* Chống bị Header che */
 }
 
 .comment-reply {
@@ -783,6 +785,19 @@
 .comment-reply .comment-content-box {
     background: #f8fafc;
     border-color: transparent;
+}
+
+/* Highlight cho bình luận được nhắm mục tiêu (từ thông báo) */
+.comment-item.highlight-notif .comment-content-box,
+.comment-thread.highlight-notif > .comment-item .comment-content-box {
+    animation: highlight-pulse 3s ease-out forwards;
+    border-color: var(--primary-color);
+}
+
+@keyframes highlight-pulse {
+    0% { background-color: rgba(99, 102, 241, 0.2); box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1); }
+    30% { background-color: rgba(99, 102, 241, 0.1); }
+    100% { background-color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
 }
 
 .comment-header {

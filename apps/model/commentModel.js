@@ -84,6 +84,15 @@ const CommentModel = {
         return rows[0]; 
     },
 
+    // Lấy chủ sở hữu của bình luận (để gửi thông báo)
+    getCommentOwner: async (commentId) => {
+        const { rows } = await db.query(
+            `SELECT user_id, article_id FROM comments WHERE id = $1`,
+            [commentId]
+        );
+        return rows[0];
+    },
+
     // Thích / Bỏ thích bình luận
     toggleLike: async (commentId, userId) => {
         // Kiểm tra xem đã like chưa

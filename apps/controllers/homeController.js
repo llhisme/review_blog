@@ -1,6 +1,7 @@
 var ArticleModel = require('../model/articleModel');
 var UserModel = require('../model/userModel');
 var CommentModel = require('../model/commentModel');
+var NotificationModel = require('../model/notificationModel');
 
 var homeController = {
         // Trang chủ - Hiển thị danh sách bài viết ĐANG HOẠT ĐỘNG
@@ -198,16 +199,33 @@ var homeController = {
                 try {
                         const newComment = await CommentModel.create(articleId, req.session.userId, content.trim(), parent_id || null);
                         
+                        // Gửi thông báo nếu là phản hồi
                         if (parent_id) {
+                            const parentOwner = await CommentModel.getCommentOwner(parent_id);
+                            if (parentOwner && parentOwner.user_id !== req.session.userId) {
+                                await NotificationModel.create({
+                                    user_id: parentOwner.user_id,
+                                    actor_id: req.session.userId,
+                                    type: 'reply_comment',
+                                    article_id: articleId,
+                                    comment_id: newComment.id
+                                });
+                            }
+
                             // Render HTML cho Reply (Bình luận con)
                             res.render('partials/comment-item', { 
                                 comment: newComment, 
-                                isReply: true
+                                isReply: true,
+                                parentId: parent_id
                             });
                         } else {
+                            // Đảm bảo có mảng replies và total_replies cho parent comment
+                            newComment.replies = [];
+                            newComment.total_replies = 0;
+
                             // Render HTML cho Parent (Bình luận gốc)
                             res.render('partials/comment-thread', { 
-                                comment: { ...newComment, replies: [] }, 
+                                comment: newComment, 
                                 articleId: articleId
                             });
                         }
@@ -275,6 +293,20 @@ var homeController = {
                 try {
                         const result = await CommentModel.toggleLike(id, req.session.userId);
                         
+                        // Nếu là hành động LIKE (mới), tạo thông báo cho chủ comment
+                        if (result.is_liked) {
+                            const commentOwner = await CommentModel.getCommentOwner(id);
+                            if (commentOwner && commentOwner.user_id !== req.session.userId) {
+                                await NotificationModel.create({
+                                    user_id: commentOwner.user_id,
+                                    actor_id: req.session.userId,
+                                    type: 'like_comment',
+                                    article_id: commentOwner.article_id,
+                                    comment_id: id
+                                });
+                            }
+                        }
+
                         const html = `
                         <button class="btn-reply" hx-post="/api/comments/${id}/like" hx-swap="outerHTML">
                             <i data-lucide="heart" size="14" class="${result.is_liked ? 'filled-icon' : ''}" style="${result.is_liked ? 'color: #e11d48;' : ''}"></i>
@@ -286,6 +318,60 @@ var homeController = {
                         console.error('Like comment error:', error);
                         res.status(500).send('Error');
                 }
+        },
+
+        // Lấy danh sách thông báo (HTMX)
+        getNotifications: async (req, res) => {
+            if (!req.session.userId) return res.send('');
+
+            try {
+                const notifications = await NotificationModel.getByUserId(req.session.userId);
+                res.render('partials/notifications-list', { notifications });
+            } catch (error) {
+                console.error('Get notifications error:', error);
+                res.status(500).send('Error');
+            }
+        },
+
+        // Đếm số thông báo chưa đọc (HTMX)
+        getUnreadCount: async (req, res) => {
+            if (!req.session.userId) return res.send('');
+            try {
+                const count = await NotificationModel.countUnread(req.session.userId);
+                res.send(count > 0 ? count.toString() : '');
+            } catch (error) {
+                res.send('');
+            }
+        },
+
+        // Đánh dấu đã đọc và điều hướng
+        readNotification: async (req, res) => {
+            if (!req.session.userId) return res.status(401).send('Unauthorized');
+            const { id } = req.params;
+            try {
+                const notif = await NotificationModel.getById(id, req.session.userId);
+                if (notif) {
+                    await NotificationModel.markAsRead(id, req.session.userId);
+                    // Trả về HX-Location để HTMX chuyển hướng mượt mà đến đúng bài viết và vị trí bình luận
+                    const targetPath = `/post/${notif.article_slug}#comment-${notif.comment_id}`;
+                    res.set('HX-Location', targetPath);
+                }
+                res.status(200).send('OK');
+            } catch (error) {
+                console.error('Read notification error:', error);
+                res.status(500).send('Error');
+            }
+        },
+
+        // Đánh dấu tất cả đã đọc
+        readAllNotifications: async (req, res) => {
+            if (!req.session.userId) return res.status(401).send('Unauthorized');
+            try {
+                await NotificationModel.markAllAsRead(req.session.userId);
+                res.status(200).send('OK');
+            } catch (error) {
+                res.status(500).send('Error');
+            }
         },
 
         // API báo cáo bình luận

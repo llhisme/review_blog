@@ -56,19 +56,30 @@
                                         <% if (locals.user) { %>
                                             <!-- Notifications -->
                                             <div class="notifications-wrapper" id="notifications-wrapper">
-                                                <button class="notifications-btn" onclick="toggleNotifications(event)">
+                                                <button class="notifications-btn" 
+                                                        onclick="toggleNotifications(event)"
+                                                        hx-get="/api/notifications/unread-count" 
+                                                        hx-trigger="load, refresh-notif-badge from:body" 
+                                                        hx-target=".notification-badge">
                                                     <i data-lucide="bell" size="20"></i>
                                                     <span class="notification-badge"></span>
                                                 </button>
                                                 <div class="notifications-dropdown" id="notifications-dropdown">
                                                     <div class="notifications-header">
                                                         <h3>Thông báo</h3>
-                                                        <button class="mark-all-read">Đánh dấu đã đọc</button>
+                                                        <button class="mark-all-read" 
+                                                                hx-post="/api/notifications/read-all" 
+                                                                hx-swap="none" 
+                                                                onclick="setTimeout(() => htmx.trigger('#notifications-list', 'refresh-list'), 100)">
+                                                            Đánh dấu đã đọc
+                                                        </button>
                                                     </div>
-                                                    <div class="notifications-list" id="notifications-list">
+                                                    <div class="notifications-list" id="notifications-list" 
+                                                         hx-get="/api/notifications" 
+                                                         hx-trigger="click from:.notifications-btn, refresh-list">
                                                         <div class="notification-empty">
-                                                            <i data-lucide="bell-off" size="32"></i>
-                                                            <p>Bạn không có thông báo nào mới</p>
+                                                            <div class="animate-spin" style="margin-bottom: 1rem;"><i data-lucide="loader-2" size="24"></i></div>
+                                                            <p>Đang tải...</p>
                                                         </div>
                                                     </div>
                                                 </div>

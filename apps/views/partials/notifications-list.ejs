@@ -1,0 +1,33 @@
+<% if (notifications && notifications.length > 0) { %>
+    <% notifications.forEach(function(n) { %>
+        <a href="/post/<%= n.article_slug %>#comment-<%= n.comment_id %>" 
+           class="notification-item <%= n.is_read ? '' : 'unread' %>" 
+           hx-post="/api/notifications/<%= n.id %>/read" 
+           hx-trigger="click" 
+           hx-swap="none">
+            <img src="<%= n.actor_avatar %>" alt="Avatar" class="notif-avatar">
+            <div class="notif-content">
+                <p>
+                    <strong><%= n.actor_name || n.actor_username %></strong> 
+                    <%= n.type === 'like_comment' ? 'đã thích bình luận của bạn' : 'đã trả lời bình luận của bạn' %> 
+                    trong <em><%= n.article_title %></em>
+                </p>
+                <span class="notif-date"><%= timeAgo(n.created_at) %></span>
+            </div>
+            <% if (!n.is_read) { %>
+                <span class="unread-dot"></span>
+            <% } %>
+        </a>
+    <% }); %>
+<% } else { %>
+    <div class="notification-empty">
+        <i data-lucide="bell-off" size="40"></i>
+        <p>Hộp thư trống</p>
+    </div>
+<% } %>
+
+<script>
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+    // Cập nhật badge
+    htmx.trigger(document.body, 'refresh-notif-badge');
+</script>

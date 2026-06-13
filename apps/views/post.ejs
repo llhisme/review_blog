@@ -207,6 +207,34 @@
         }
     }
 
+    // Hiệu ứng nhận diện bình luận từ thông báo
+    function handleNotificationHighlight() {
+        const hash = window.location.hash;
+        if (hash && hash.startsWith('#comment-')) {
+            const targetId = hash.substring(1);
+            const element = document.getElementById(targetId);
+            if (element) {
+                // Thêm class highlight
+                element.classList.add('highlight-notif');
+                
+                // Cuộn tới vị trí chính giữa để dễ nhìn nhất
+                setTimeout(() => {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+
+                // Xóa hash trên URL để khi F5 không bị highlight lại
+                setTimeout(() => {
+                    history.replaceState(null, null, window.location.pathname + window.location.search);
+                }, 3500);
+
+                // Xóa class sau khi animation kết thúc
+                setTimeout(() => {
+                    element.classList.remove('highlight-notif');
+                }, 4000);
+            }
+        }
+    }
+
     function initToc() {
         const articleContent = document.getElementById('article-content');
         const tocList = document.getElementById('toc-list');
@@ -286,8 +314,14 @@
         updateActiveSection();
     }
 
-    document.addEventListener('DOMContentLoaded', initToc);
-    document.addEventListener('htmx:afterSettle', initToc);
+    document.addEventListener('DOMContentLoaded', () => {
+        initToc();
+        handleNotificationHighlight();
+    });
+    document.addEventListener('htmx:afterSettle', () => {
+        initToc();
+        handleNotificationHighlight();
+    });
 </script>
 
 <script>
