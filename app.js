@@ -2,6 +2,8 @@ const express = require('express');
 const session = require('express-session');
 const path = require('path');
 const multer = require('multer');
+const http = require('http');
+const socketIo = require('socket.io');
 
 // Cấu hình Multer cho Avatar Upload
 const storage = multer.diskStorage({
@@ -21,6 +23,9 @@ const adminController = require('./apps/controllers/adminController');
 const authController = require('./apps/controllers/authController');
 
 const app = express();
+const server = http.createServer(app);
+const io = socketIo(server);
+
 const PORT = process.env.PORT || 3000;
 const SITE_URL = process.env.SITE_URL || `http://localhost:${PORT}`;
 
@@ -59,19 +64,23 @@ app.locals.timeAgo = function(dateInput) {
     });
 };
 
-// Middleware
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-app.use(session({
+// Cấu hình Session
+const sessionMiddleware = session({
         secret: process.env.SESSION_SECRET || 'purepick-secret-key-fallback',
         resave: false,
         saveUninitialized: false,
         cookie: { secure: false } // Mặc định hết hạn khi đóng trình duyệt
-}));
+});
 
-// Global middleware to provide SITE_URL and user session to all views
+// Middleware
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(sessionMiddleware);
+
+// Chia sẻ io instance qua req và middleware
 app.use((req, res, next) => {
+        req.io = io;
         res.locals.SITE_URL = SITE_URL;
         res.locals.user = req.session.userId ? { 
             id: req.session.userId, 
@@ -81,6 +90,24 @@ app.use((req, res, next) => {
             avatar_url: req.session.avatar_url
         } : null;
         next();
+});
+
+// Cấu hình Socket.io chia sẻ session
+io.use((socket, next) => {
+    sessionMiddleware(socket.request, socket.request.res || {}, next);
+});
+
+io.on('connection', (socket) => {
+    const session = socket.request.session;
+    if (session && session.userId) {
+        // Tham gia phòng riêng theo userId để nhận thông báo cá nhân
+        socket.join(`user_${session.userId}`);
+        console.log(`User ${session.userId} connected via socket.`);
+    }
+
+    socket.on('disconnect', () => {
+        // Handle disconnect if needed
+    });
 });
 
 // ==================== ROUTES ====================
@@ -158,7 +185,7 @@ app.use((req, res) => {
 });
 
 // Khởi động server (CHỈ THÊM '0.0.0.0' VÀO ĐÂY)
-app.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, '0.0.0.0', () => {
         console.log('='.repeat(50));
         console.log('🚀 Website đang chạy tại:');
         console.log(`    📖 Người dùng: http://localhost:${PORT}`);

@@ -36,6 +36,8 @@ var authController = {
                 }
                 
                 // Trả về HX-Location để HTMX thực hiện load lại trang mượt mà qua AJAX
+                // Thêm trigger refresh-socket để cập nhật kết nối Socket.io ngay lập tức
+                res.set('HX-Trigger', 'refresh-socket');
                 res.set('HX-Location', '{"path":"' + req.get('Referrer') + '", "target":"body"}');
                 return res.send('');
             } else {

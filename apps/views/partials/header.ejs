@@ -24,6 +24,100 @@
         <script src="https://unpkg.com/lucide@latest"></script>
         <!-- HTMX for SPA transitions -->
         <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+        <!-- Socket.io for Real-time Notifications -->
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+            // Khởi tạo kết nối Socket.io toàn cục
+            if (!window.appSocket) {
+                window.appSocket = io();
+                
+                window.appSocket.on('newNotification', (data) => {
+                    // Kích hoạt sự kiện để HTMX tự động cập nhật badge và danh sách
+                    htmx.trigger(document.body, 'refresh-notif-badge');
+                    
+                    // Nếu dropdown đang mở, tự động cập nhật danh sách
+                    const notifDropdown = document.getElementById('notifications-dropdown');
+                    if (notifDropdown && notifDropdown.classList.contains('active')) {
+                        htmx.trigger('#notifications-list', 'refresh-list');
+                    }
+
+                    // Tùy chọn: Thêm hiệu ứng rung cho chuông để gây chú ý
+                    const bellIcon = document.querySelector('.notifications-btn i');
+                    if (bellIcon) {
+                        bellIcon.classList.add('lucide-shake');
+                        setTimeout(() => bellIcon.classList.remove('lucide-shake'), 1000);
+                    }
+
+                    // Hiển thị Toast
+                    if (data && data.actor_name) {
+                        showToast(data);
+                    }
+                });
+            }
+
+            // Đảm bảo Socket.io nhận diện đúng Session mới sau khi HTMX swap (Đăng nhập/Đăng xuất)
+            function reconnectSocket() {
+                if (window.appSocket) {
+                    console.log('Reconnecting socket to pick up new session...');
+                    window.appSocket.disconnect();
+                    setTimeout(() => {
+                        window.appSocket.connect();
+                    }, 200); // Đợi thêm một chút để đảm bảo cookie đã được trình duyệt ghi nhận hoàn toàn
+                }
+            }
+
+            document.addEventListener('htmx:afterSettle', (e) => {
+                const target = e.detail.target;
+                if (target && (target.tagName === 'BODY' || target.id === 'site-header')) {
+                    reconnectSocket();
+                }
+            });
+
+            // Lắng nghe trigger đặc biệt từ server
+            document.body.addEventListener('refresh-socket', reconnectSocket);
+
+            function showToast(data) {
+                let container = document.getElementById('toast-container');
+                if (!container) {
+                    container = document.createElement('div');
+                    container.id = 'toast-container';
+                    document.body.appendChild(container);
+                }
+
+                const toast = document.createElement('div');
+                toast.className = 'toast-item';
+                
+                const actionText = data.type === 'like_comment' ? 'đã thích bình luận của bạn.' : 'đã trả lời bình luận của bạn.';
+                
+                toast.innerHTML = `
+                    <img src="${data.actor_avatar}" alt="Avatar" class="toast-avatar">
+                    <div class="toast-content">
+                        <p><strong>${data.actor_name}</strong> ${actionText}</p>
+                    </div>
+                    <div class="toast-progress"></div>
+                `;
+
+                // Click để mở danh sách thông báo
+                toast.addEventListener('click', () => {
+                    const notifBtn = document.querySelector('.notifications-btn');
+                    const dropdown = document.getElementById('notifications-dropdown');
+                    if (notifBtn && dropdown && !dropdown.classList.contains('active')) {
+                        notifBtn.click();
+                    }
+                    toast.classList.add('fade-out');
+                });
+
+                container.appendChild(toast);
+
+                // Tự động xóa sau 5 giây
+                setTimeout(() => {
+                    if (!toast.classList.contains('fade-out')) {
+                        toast.classList.add('fade-out');
+                        setTimeout(() => toast.remove(), 400); // Đợi animation kết thúc
+                    }
+                }, 5000);
+            }
+        </script>
         <!-- NProgress for loading bar -->
         <script src="https://unpkg.com/nprogress@0.2.0/nprogress.js"></script>
         <link rel="stylesheet" href="https://unpkg.com/nprogress@0.2.0/nprogress.css" />

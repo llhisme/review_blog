@@ -203,13 +203,23 @@ var homeController = {
                         if (parent_id) {
                             const parentOwner = await CommentModel.getCommentOwner(parent_id);
                             if (parentOwner && parentOwner.user_id !== req.session.userId) {
-                                await NotificationModel.create({
+                                const notif = await NotificationModel.create({
                                     user_id: parentOwner.user_id,
                                     actor_id: req.session.userId,
                                     type: 'reply_comment',
                                     article_id: articleId,
                                     comment_id: newComment.id
                                 });
+
+                                // Real-time emit
+                                if (notif && req.io) {
+                                    req.io.to(`user_${parentOwner.user_id}`).emit('newNotification', { 
+                                        count: 1,
+                                        type: 'reply_comment',
+                                        actor_name: req.session.full_name || req.session.username,
+                                        actor_avatar: req.session.avatar_url
+                                    });
+                                }
                             }
 
                             // Render HTML cho Reply (Bình luận con)
@@ -297,13 +307,23 @@ var homeController = {
                         if (result.is_liked) {
                             const commentOwner = await CommentModel.getCommentOwner(id);
                             if (commentOwner && commentOwner.user_id !== req.session.userId) {
-                                await NotificationModel.create({
+                                const notif = await NotificationModel.create({
                                     user_id: commentOwner.user_id,
                                     actor_id: req.session.userId,
                                     type: 'like_comment',
                                     article_id: commentOwner.article_id,
                                     comment_id: id
                                 });
+
+                                // Real-time emit
+                                if (notif && req.io) {
+                                    req.io.to(`user_${commentOwner.user_id}`).emit('newNotification', { 
+                                        count: 1,
+                                        type: 'like_comment',
+                                        actor_name: req.session.full_name || req.session.username,
+                                        actor_avatar: req.session.avatar_url 
+                                    });
+                                }
                             }
                         }
 
