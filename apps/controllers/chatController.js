@@ -73,7 +73,9 @@ var chatController = {
             - TUYỆT ĐỐI KHÔNG nói chung chung kiểu "bạn có thể xem chi tiết tại web PurePick" mà lười không gắn link. Bạn PHẢI TRỰC TIẾP cung cấp link cho người dùng bấm vào!
             - Định dạng link BẮT BUỘC: <a href="[Link từ danh sách tóm tắt]" class="ai-product-link">[Tên sản phẩm]</a>
             - TUYỆT ĐỐI KHÔNG sao chép y nguyên định dạng dữ liệu thô. Bạn phải viết thành câu văn tự nhiên.
-            - KHI ĐƯA LINK: Thẻ <a> BẮT BUỘC phải đứng ĐỘC LẬP trên một dòng riêng biệt. TUYỆT ĐỐI KHÔNG nhúng thẻ <a> vào giữa đoạn văn hay nối tiếp ngay sau dòng liệt kê.
+            - QUY TẮC XUỐNG DÒNG VỚI LINK: 
+              + Thẻ <a> phải nằm ở ngay dòng tiếp theo của mô tả sản phẩm. KHÔNG ĐƯỢC ĐỂ DÒNG TRỐNG giữa mô tả và thẻ <a>.
+              + NHƯNG BẮT BUỘC PHẢI CÁCH MỘT DÒNG TRỐNG trước khi chuyển sang gợi ý sản phẩm tiếp theo.
             
             ĐỊNH DẠNG BẮT BUỘC: 
             - Trả lời ngắn gọn, súc tích, thân thiện.

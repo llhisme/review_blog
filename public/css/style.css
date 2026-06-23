@@ -1620,6 +1620,8 @@ a.user-dropdown-header:hover {
     font-size: 0.9rem;
     transition: all 0.2s;
     outline: none;
+    box-sizing: border-box;
+    margin: 0;
 }
 
 #chatbot-input:focus {
@@ -1639,6 +1641,14 @@ a.user-dropdown-header:hover {
     align-items: center;
     justify-content: center;
     transition: all 0.2s;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+#chatbot-send-btn i {
+    /* Bù trừ hiệu ứng thị giác: Icon mũi tên giấy thường trông lệch lên trên/bên phải */
+    transform: translateX(-1px) translateY(1px);
 }
 
 #chatbot-send-btn:hover {
