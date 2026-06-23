@@ -78,7 +78,7 @@ const CommentModel = {
     // Xóa bình luận
     delete: async (commentId, userId) => {
         const { rows } = await db.query(
-            `DELETE FROM comments WHERE id = $1 AND user_id = $2 RETURNING id`,
+            `DELETE FROM comments WHERE id = $1 AND user_id = $2 RETURNING id, article_id`,
             [commentId, userId]
         );
         return rows[0]; 

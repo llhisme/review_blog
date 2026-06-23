@@ -1,17 +1,18 @@
 <% if (typeof isPartial !== 'undefined' && isPartial) { %>
     <!-- HTMX PARTIAL: Chỉ trả về nội dung của grid và phân trang -->
     <% if (articles && articles.length > 0) { %>
-        <div class="articles-grid">
-            <% articles.forEach(function(article) { %>
-                <article class="article-card" id="saved-card-<%= article.id %>">
-                    <div class="article-thumb" style="background-image: url('<%= article.thumbnail %>')">
-                        <a href="/post/<%= article.slug %>">
-                            <% if (article.thumbnail) { %>
-                                <img src="<%= article.thumbnail %>" alt="<%= article.title %>">
-                            <% } else { %>
-                                <div class="no-thumb"><i data-lucide="image-off"></i></div>
-                            <% } %>
-                        </a>
+        <section class="latest-section">
+            <div class="articles-grid">
+                <% articles.forEach(function(article) { %>
+                    <article class="article-card" id="saved-card-<%= article.id %>">
+                        <div class="article-thumb" style="--bg-img: url('<%= article.thumbnail %>')">
+                            <a href="/post/<%= article.slug %>">
+                                <% if (article.thumbnail) { %>
+                                    <img src="<%= article.thumbnail %>" alt="<%= article.title %>">
+                                <% } else { %>
+                                    <div class="no-thumb"><i data-lucide="image-off"></i></div>
+                                <% } %>
+                            </a>
                         <% if (article.category) { %>
                             <span class="card-badge"><%= article.category === 'skincare' ? 'CHĂM SÓC DA' : article.category === 'makeup' ? 'TRANG ĐIỂM' : article.category.toUpperCase() %></span>
                         <% } %>
@@ -34,7 +35,8 @@
                     </div>
                 </article>
             <% }); %>
-        </div>
+            </div>
+        </section>
 
         <% if (totalPages > 1) { %>
             <div class="pagination-container" style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 3rem;">
@@ -114,7 +116,7 @@
         });
     </script>
 
-    <div class="quick-categories-wrapper" id="quick-categories-wrapper" hx-preserve="true">
+    <div class="quick-categories-wrapper" id="saved-quick-categories-wrapper" hx-preserve="true">
         <div class="container">
             <div class="quick-categories">
                 <% 
@@ -146,7 +148,7 @@
         </div>
 
         <!-- Bộ lọc ĐỒNG BỘ với Trang Chủ -->
-        <section class="compact-filter-section" id="compact-filter-section" hx-preserve="true" style="margin-bottom: 3rem;">
+        <section class="compact-filter-section" id="saved-compact-filter-section" hx-preserve="true" style="margin-bottom: 3rem;">
             <form action="/saved" method="GET" id="filter-form"
                   hx-get="/saved" hx-trigger="submit, keyup from:#keyword-search-unified delay:400ms changed" 
                   hx-target="#saved-results" hx-swap="innerHTML show:no-scroll" hx-push-url="true">
@@ -201,17 +203,18 @@
 
         <div id="saved-results" style="min-height: 40vh;">
             <% if (articles && articles.length > 0) { %>
-                <div class="articles-grid">
-                    <% articles.forEach(function(article) { %>
-                        <article class="article-card" id="saved-card-<%= article.id %>">
-                            <div class="article-thumb" style="background-image: url('<%= article.thumbnail %>')">
-                                <a href="/post/<%= article.slug %>">
-                                    <% if (article.thumbnail) { %>
-                                        <img src="<%= article.thumbnail %>" alt="<%= article.title %>">
-                                    <% } else { %>
-                                        <div class="no-thumb"><i data-lucide="image-off"></i></div>
-                                    <% } %>
-                                </a>
+                <section class="latest-section">
+                    <div class="articles-grid">
+                        <% articles.forEach(function(article) { %>
+                            <article class="article-card" id="saved-card-<%= article.id %>">
+                                <div class="article-thumb" style="--bg-img: url('<%= article.thumbnail %>')">
+                                    <a href="/post/<%= article.slug %>">
+                                        <% if (article.thumbnail) { %>
+                                            <img src="<%= article.thumbnail %>" alt="<%= article.title %>">
+                                        <% } else { %>
+                                            <div class="no-thumb"><i data-lucide="image-off"></i></div>
+                                        <% } %>
+                                    </a>
                                 <% if (article.category) { %>
                                     <span class="card-badge"><%= article.category === 'skincare' ? 'CHĂM SÓC DA' : article.category === 'makeup' ? 'TRANG ĐIỂM' : article.category.toUpperCase() %></span>
                                 <% } %>
@@ -234,7 +237,8 @@
                             </div>
                         </article>
                     <% }); %>
-                </div>
+                    </div>
+                </section>
 
                 <% if (totalPages > 1) { %>
                     <div class="pagination-container" style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 3rem;">

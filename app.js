@@ -21,6 +21,7 @@ const upload = multer({ storage: storage });
 const homeController = require('./apps/controllers/homeController');
 const adminController = require('./apps/controllers/adminController');
 const authController = require('./apps/controllers/authController');
+const chatController = require('./apps/controllers/chatController');
 
 const app = express();
 const server = http.createServer(app);
@@ -152,6 +153,9 @@ app.post('/api/notifications/read-all', homeController.readAllNotifications);
 
 // Tracking
 app.post('/api/track-click/:id', homeController.trackClick);
+
+// Chatbot AI
+app.post('/api/chat', chatController.handleChat);
 
 // Admin - Đăng nhập
 app.get('/admin/login', adminController.loginPage);

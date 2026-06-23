@@ -199,6 +199,12 @@ var homeController = {
                 try {
                         const newComment = await CommentModel.create(articleId, req.session.userId, content.trim(), parent_id || null);
                         
+                        const totalComments = await CommentModel.countTotalComments(articleId);
+                        let oobHtml = `<span id="total-comments-count" hx-swap-oob="true">${totalComments}</span>`;
+                        if (totalComments === 1 && !parent_id) {
+                            oobHtml += `<p id="no-comments-msg" hx-swap-oob="true"></p>`;
+                        }
+
                         // Gửi thông báo nếu là phản hồi
                         if (parent_id) {
                             const parentOwner = await CommentModel.getCommentOwner(parent_id);
@@ -227,6 +233,9 @@ var homeController = {
                                 comment: newComment, 
                                 isReply: true,
                                 parentId: parent_id
+                            }, (err, html) => {
+                                if (err) return res.status(500).send('');
+                                res.send(html + oobHtml);
                             });
                         } else {
                             // Đảm bảo có mảng replies và total_replies cho parent comment
@@ -237,6 +246,9 @@ var homeController = {
                             res.render('partials/comment-thread', { 
                                 comment: newComment, 
                                 articleId: articleId
+                            }, (err, html) => {
+                                if (err) return res.status(500).send('');
+                                res.send(html + oobHtml);
                             });
                         }
                 } catch (error) {
@@ -284,8 +296,12 @@ var homeController = {
                         if (!deleted) {
                                 return res.status(403).send('');
                         }
-                        // Trả về rỗng để HTMX xóa element (hx-swap="outerHTML")
-                        res.send('');
+                        
+                        const totalComments = await CommentModel.countTotalComments(deleted.article_id);
+                        const oobHtml = `<span id="total-comments-count" hx-swap-oob="true">${totalComments}</span>`;
+                        
+                        // Trả về oobHtml để cập nhật số lượng, và rỗng để HTMX xóa thẻ (outerHTML)
+                        res.send(oobHtml);
                 } catch (error) {
                         console.error('Delete comment error:', error);
                         res.status(500).send('');

@@ -66,6 +66,14 @@ var ArticleModel = {
                 };
         },
 
+        // Lấy tất cả bài viết kèm content cho RAG search
+        getAllForRAG: async () => {
+                const { rows } = await db.query(
+                        "SELECT id, title, slug, category, excerpt, content FROM articles WHERE status = 'active'"
+                );
+                return rows;
+        },
+
         // Lấy bài viết theo slug
         getBySlug: async (slug, onlyActive = true) => {
                 let query = 'SELECT * FROM articles WHERE slug = $1';

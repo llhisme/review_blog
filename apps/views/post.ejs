@@ -1,364 +1,409 @@
 <%- include('partials/header') %>
 
-<div class="container">
-    <div class="post-layout-container">
-        <!-- SIDEBAR: Table of Contents -->
-        <aside class="post-sidebar">
-            <div class="toc-card">
-                <h3><i data-lucide="list"></i> MỤC LỤC</h3>
-                <nav>
-                    <ul class="toc-list" id="toc-list">
-                        <!-- ToC items will be generated here -->
-                    </ul>
-                </nav>
-            </div>
-        </aside>
-
-        <!-- MAIN ARTICLE CONTENT -->
-        <article class="full-post">
-            <header class="post-header">
-                <h1><%= article.title %></h1>
-                <div class="post-meta">
-                    <span class="meta-item"><i data-lucide="calendar"></i> <%= new Date(article.created_at).toLocaleDateString('vi-VN', { day: '2-digit', month: 'long', year: 'numeric' }) %></span>
-                    <span class="meta-item"><i data-lucide="tag"></i> <%= article.category === 'skincare' ? 'Chăm sóc da' : article.category === 'makeup' ? 'Trang điểm' : article.category %></span>
+    <div class="container">
+        <div class="post-layout-container">
+            <!-- SIDEBAR: Table of Contents -->
+            <aside class="post-sidebar">
+                <div class="toc-card">
+                    <h3><i data-lucide="list"></i> MỤC LỤC</h3>
+                    <nav>
+                        <ul class="toc-list" id="toc-list">
+                            <!-- ToC items will be generated here -->
+                        </ul>
+                    </nav>
                 </div>
-            </header>
+            </aside>
 
-            <div class="post-content ql-snow" id="article-content" data-article-id="<%= article.id %>">
-                <%- article.content %>
-            </div>
+            <!-- MAIN ARTICLE CONTENT -->
+            <article class="full-post">
+                <header class="post-header">
+                    <h1>
+                        <%= article.title %>
+                    </h1>
+                    <div class="post-meta">
+                        <span class="meta-item"><i data-lucide="calendar"></i>
+                            <%= new Date(article.created_at).toLocaleDateString('vi-VN', { day: '2-digit' ,
+                                month: 'long' , year: 'numeric' }) %>
+                        </span>
+                        <span class="meta-item"><i data-lucide="tag"></i>
+                            <%= article.category==='skincare' ? 'Chăm sóc da' : article.category==='makeup'
+                                ? 'Trang điểm' : article.category %>
+                        </span>
+                    </div>
+                </header>
 
-            <% if (article.affiliate_link) { %>
-            <div class="affiliate-box" data-article-id="<%= article.id %>">
-                <div class="affiliate-icon">
-                    <i data-lucide="shopping-cart" size="32"></i>
+                <div class="post-content ql-snow" id="article-content" data-article-id="<%= article.id %>">
+                    <%- article.content %>
                 </div>
-                <div class="affiliate-info">
-                    <h3>Ưu đãi dành riêng cho bạn!</h3>
-                    <p>Sản phẩm này hiện đang có giá tốt nhất tại cửa hàng chính hãng.</p>
+
+                <% if (article.affiliate_link) { %>
+                    <div class="affiliate-box" data-article-id="<%= article.id %>">
+                        <div class="affiliate-icon">
+                            <i data-lucide="shopping-cart" size="32"></i>
+                        </div>
+                        <div class="affiliate-info">
+                            <h3>Ưu đãi dành riêng cho bạn!</h3>
+                            <p>Sản phẩm này hiện đang có giá tốt nhất tại cửa hàng chính hãng.</p>
+                        </div>
+                        <a href="<%= article.affiliate_link %>" target="_blank" rel="nofollow" class="affiliate-btn">
+                            <i data-lucide="external-link"></i> Mua ngay
+                        </a>
+                    </div>
+                    <p class="disclaimer-text">* Lưu ý: Đây là liên kết tiếp thị, mình có thể nhận được một khoản hoa
+                        hồng nhỏ nếu bạn mua qua link này mà không tốn thêm bất kỳ chi phí nào cho bạn.</p>
+                    <% } %>
+
+                        <div class="post-footer">
+                            <div class="action-buttons" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                                <a href="https://www.facebook.com/sharer/sharer.php?u=<%= encodeURIComponent((typeof SITE_URL !== 'undefined' ? SITE_URL : 'http://localhost:3000') + '/post/' + article.slug) %>"
+                                    target="_blank" class="share-btn">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z">
+                                        </path>
+                                    </svg>
+                                    <span>Chia sẻ</span>
+                                </a>
+
+                                <button class="action-btn <%= isLiked ? 'active' : '' %>"
+                                    hx-post="/api/like/<%= article.id %>" hx-swap="outerHTML">
+                                    <i data-lucide="heart" class="<%= isLiked ? 'filled-icon' : '' %>"></i>
+                                    <%= isLiked ? 'Đã thích' : 'Thích' %>
+                                </button>
+
+                                <button class="action-btn <%= isSaved ? 'active' : '' %>"
+                                    hx-post="/api/save/<%= article.id %>" hx-swap="outerHTML">
+                                    <i data-lucide="bookmark" class="<%= isSaved ? 'filled-icon' : '' %>"></i>
+                                    <%= isSaved ? 'Đã lưu' : 'Lưu bài' %>
+                                </button>
+                            </div>
+                            <div class="back-link">
+                                <a href="/">
+                                    <i data-lucide="arrow-left"></i> Quay lại
+                                </a>
+                            </div>
+                        </div>
+            </article>
+        </div>
+
+        <!-- Related Articles -->
+        <% if (typeof relatedArticles !=='undefined' && relatedArticles.length> 0) { %>
+            <section class="related-section"
+                style="margin-top: 4rem; border-top: 1px solid #e2e8f0; padding-top: 3rem; margin-bottom: 2rem;">
+                <h2 class="section-title">Có thể nàng sẽ thích <i data-lucide="heart" style="color: #ec4899;"></i></h2>
+                <div class="articles-grid">
+                    <% relatedArticles.forEach(function(rel) { %>
+                        <article class="article-card">
+                            <div class="article-thumb" style="--bg-img: url('<%= rel.thumbnail %>')">
+                                <a href="/post/<%= rel.slug %>">
+                                    <% if (rel.thumbnail) { %>
+                                        <img src="<%= rel.thumbnail %>" alt="<%= rel.title %>">
+                                        <% } else { %>
+                                            <div class="no-thumb"><i data-lucide="image-off"></i></div>
+                                            <% } %>
+                                </a>
+                                <% if (rel.is_recommended) { %>
+                                    <span class="card-badge"
+                                        style="background: #10b981; color: white; display: flex; align-items: center; gap: 0.25rem;"><i
+                                            data-lucide="sparkles" size="14"></i> Mảnh ghép hoàn hảo</span>
+                                    <% } %>
+                                        <div class="article-excerpt desktop-only">
+                                            <%= rel.excerpt || (rel.content ? rel.content.replace(/<[^>]*>?/gm,
+                                                '').substring(0, 120) + '...' : '') %>
+                                        </div>
+                            </div>
+                            <div class="article-card-content">
+                                <h2 style="font-size: 1.1rem;"><a href="/post/<%= rel.slug %>">
+                                        <%= rel.title %>
+                                    </a></h2>
+                                <p class="article-excerpt-mobile mobile-only">
+                                    <%= rel.excerpt || (rel.content ? rel.content.replace(/<[^>]*>?/gm, '').substring(0,
+                                        120) + '...' : '') %>
+                                </p>
+                                <div class="article-meta">
+                                    <span class="article-date">
+                                        <i data-lucide="tag" size="14"></i>
+                                        <%= rel.skin_type==='oily' ? 'Da dầu' : rel.skin_type==='dry' ? 'Da khô' :
+                                            rel.skin_type==='sensitive' ? 'Da nhạy cảm' : 'Mọi loại da' %>
+                                    </span>
+                                    <a href="/post/<%= rel.slug %>" class="read-more" style="font-size: 0.85rem;">Xem
+                                        ngay</a>
+                                </div>
+                            </div>
+                        </article>
+                        <% }); %>
                 </div>
-                <a href="<%= article.affiliate_link %>" target="_blank" rel="nofollow" class="affiliate-btn">
-                    <i data-lucide="external-link"></i> Mua ngay
-                </a>
-            </div>
-            <p class="disclaimer-text">* Lưu ý: Đây là liên kết tiếp thị, mình có thể nhận được một khoản hoa hồng nhỏ nếu bạn mua qua link này mà không tốn thêm bất kỳ chi phí nào cho bạn.</p>
+            </section>
             <% } %>
 
-            <div class="post-footer">
-                <div class="action-buttons" style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                    <a href="https://www.facebook.com/sharer/sharer.php?u=<%= encodeURIComponent((typeof SITE_URL !== 'undefined' ? SITE_URL : 'http://localhost:3000') + '/post/' + article.slug) %>" target="_blank" class="share-btn">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
-                        <span>Chia sẻ</span>
-                    </a>
-                    
-                    <button class="action-btn <%= isLiked ? 'active' : '' %>" hx-post="/api/like/<%= article.id %>" hx-swap="outerHTML">
-                        <i data-lucide="heart" class="<%= isLiked ? 'filled-icon' : '' %>"></i> 
-                        <%= isLiked ? 'Đã thích' : 'Thích' %>
-                    </button>
+                <!-- MỤC BÌNH LUẬN -->
+                <section class="comments-section"
+                    style="max-width: 800px; margin: 4rem auto 6rem; padding-top: 3rem; border-top: 1px solid #e2e8f0;">
+                    <h3
+                        style="font-size: 1.5rem; font-weight: 800; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i data-lucide="message-square" style="color: var(--primary-color);"></i> Bình luận (<span
+                            id="total-comments-count">
+                            <%= typeof totalComments !=='undefined' ? totalComments : 0 %>
+                        </span>)
+                    </h3>
 
-                    <button class="action-btn <%= isSaved ? 'active' : '' %>" hx-post="/api/save/<%= article.id %>" hx-swap="outerHTML">
-                        <i data-lucide="bookmark" class="<%= isSaved ? 'filled-icon' : '' %>"></i> 
-                        <%= isSaved ? 'Đã lưu' : 'Lưu bài' %>
-                    </button>
-                </div>
-                <div class="back-link">
-                    <a href="/">
-                        <i data-lucide="arrow-left"></i> Quay lại
-                    </a>
-                </div>
-            </div>
-        </article>
+                    <!-- Form nhập bình luận gốc -->
+                    <div class="comment-input-area">
+                        <% if (locals.user) { %>
+                            <div class="comment-form-wrapper">
+                                <img src="<%= locals.user.avatar_url %>" alt="Avatar" class="comment-avatar">
+                                <form class="comment-form" hx-post="/api/comments/<%= article.id %>"
+                                    hx-swap="afterbegin" hx-target="#comments-list"
+                                    onsubmit="setTimeout(() => this.reset(), 10)">
+                                    <textarea name="content" placeholder="Chia sẻ suy nghĩ của bạn về sản phẩm này..."
+                                        required rows="3"></textarea>
+                                    <div class="comment-form-footer">
+                                        <button type="submit" class="comment-submit-btn">Gửi bình luận <i
+                                                data-lucide="send" size="16"></i></button>
+                                    </div>
+                                </form>
+                            </div>
+                            <% } else { %>
+                                <div class="comment-login-prompt glass">
+                                    <i data-lucide="lock" size="32"
+                                        style="color: var(--text-muted); margin-bottom: 1rem;"></i>
+                                    <p style="font-weight: 600; margin-bottom: 1rem;">Vui lòng đăng nhập để tham gia
+                                        thảo luận cùng cộng đồng PurePick.</p>
+                                    <button class="btn-primary" onclick="openAuthModal()"
+                                        style="display: inline-flex;"><i data-lucide="user"></i> Đăng nhập ngay</button>
+                                </div>
+                                <% } %>
+                    </div>
+
+                    <!-- Danh sách bình luận -->
+                    <div class="comments-list" id="comments-list">
+                        <% if (comments && comments.length> 0) { %>
+                            <%- include('partials/comments-chunk', { comments: comments, articleId: article.id,
+                                hasMoreParents: hasMoreParents, nextParentOffset: 5 }) %>
+                                <% } else { %>
+                                    <p id="no-comments-msg"
+                                        style="text-align: center; color: var(--text-muted); padding: 2rem 0; font-style: italic;">
+                                        Chưa có bình luận nào. Hãy là người đầu tiên chia sẻ cảm nhận nhé!</p>
+                                    <% } %>
+                    </div>
+                </section>
     </div>
 
-    <!-- MỤC BÌNH LUẬN -->
-    <section class="comments-section" style="max-width: 800px; margin: 4rem auto 0; padding-top: 3rem; border-top: 1px solid #e2e8f0;">
-        <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem;">
-            <i data-lucide="message-square" style="color: var(--primary-color);"></i> Bình luận (<%= typeof totalComments !== 'undefined' ? totalComments : 0 %>)
-        </h3>
+    <script>
+        // Logic cho phần bình luận
+        function toggleCommentOptions(commentId) {
+            const dropdown = document.getElementById(`comment-options-${commentId}`);
+            if (dropdown) {
+                // Đóng tất cả các dropdown khác trước khi mở
+                document.querySelectorAll('.comment-dropdown').forEach(d => {
+                    if (d.id !== `comment-options-${commentId}`) {
+                        d.style.display = 'none';
+                    }
+                });
 
-        <!-- Form nhập bình luận gốc -->
-        <div class="comment-input-area">
-            <% if (locals.user) { %>
-                <div class="comment-form-wrapper">
-                    <img src="<%= locals.user.avatar_url %>" alt="Avatar" class="comment-avatar">
-                    <form class="comment-form" hx-post="/api/comments/<%= article.id %>" hx-swap="afterbegin" hx-target="#comments-list" onsubmit="setTimeout(() => this.reset(), 10)">
-                        <textarea name="content" placeholder="Chia sẻ suy nghĩ của bạn về sản phẩm này..." required rows="3"></textarea>
-                        <div class="comment-form-footer">
-                            <button type="submit" class="comment-submit-btn">Gửi bình luận <i data-lucide="send" size="16"></i></button>
-                        </div>
-                    </form>
-                </div>
-            <% } else { %>
-                <div class="comment-login-prompt glass">
-                    <i data-lucide="lock" size="32" style="color: var(--text-muted); margin-bottom: 1rem;"></i>
-                    <p style="font-weight: 600; margin-bottom: 1rem;">Vui lòng đăng nhập để tham gia thảo luận cùng cộng đồng PurePick.</p>
-                    <button class="btn-primary" onclick="openAuthModal()" style="display: inline-flex;"><i data-lucide="user"></i> Đăng nhập ngay</button>
-                </div>
-            <% } %>
-        </div>
+                if (dropdown.style.display === 'none' || dropdown.style.display === '') {
+                    dropdown.style.display = 'block';
+                } else {
+                    dropdown.style.display = 'none';
+                }
+            }
+        }
 
-        <!-- Danh sách bình luận -->
-        <div class="comments-list" id="comments-list">
-            <% if (comments && comments.length > 0) { %>
-                <%- include('partials/comments-chunk', { comments: comments, articleId: article.id, hasMoreParents: hasMoreParents, nextParentOffset: 5 }) %>
-            <% } else { %>
-                <p id="no-comments-msg" style="text-align: center; color: var(--text-muted); padding: 2rem 0; font-style: italic;">Chưa có bình luận nào. Hãy là người đầu tiên chia sẻ cảm nhận nhé!</p>
-            <% } %>
-        </div>
-    </section>
-
-    <!-- Related Articles -->
-    <% if (typeof relatedArticles !== 'undefined' && relatedArticles.length > 0) { %>
-    <section class="related-section" style="margin-top: 5rem; border-top: 1px solid #e2e8f0; padding-top: 3rem; margin-bottom: 6rem;">
-        <h2 class="section-title">Có thể nàng sẽ thích <i data-lucide="heart" style="color: #ec4899;"></i></h2>
-        <div class="articles-grid">
-            <% relatedArticles.forEach(function(rel) { %>
-            <article class="article-card">
-                <div class="article-thumb" style="--bg-img: url('<%= rel.thumbnail %>')">
-                    <a href="/post/<%= rel.slug %>">
-                        <% if (rel.thumbnail) { %>
-                            <img src="<%= rel.thumbnail %>" alt="<%= rel.title %>">
-                        <% } else { %>
-                            <div class="no-thumb"><i data-lucide="image-off"></i></div>
-                        <% } %>
-                    </a>
-                    <% if (rel.is_recommended) { %>
-                        <span class="card-badge" style="background: #10b981; color: white; display: flex; align-items: center; gap: 0.25rem;"><i data-lucide="sparkles" size="14"></i> Mảnh ghép hoàn hảo</span>
-                    <% } %>
-                    <div class="article-excerpt desktop-only"><%= rel.excerpt || (rel.content ? rel.content.replace(/<[^>]*>?/gm, '').substring(0, 120) + '...' : '') %></div>
-                </div>
-                <div class="article-card-content">
-                    <h2 style="font-size: 1.1rem;"><a href="/post/<%= rel.slug %>"><%= rel.title %></a></h2>
-                    <p class="article-excerpt-mobile mobile-only"><%= rel.excerpt || (rel.content ? rel.content.replace(/<[^>]*>?/gm, '').substring(0, 120) + '...' : '') %></p>
-                    <div class="article-meta">
-                        <span class="article-date">
-                            <i data-lucide="tag" size="14"></i>
-                            <%= rel.skin_type === 'oily' ? 'Da dầu' : rel.skin_type === 'dry' ? 'Da khô' : rel.skin_type === 'sensitive' ? 'Da nhạy cảm' : 'Mọi loại da' %>
-                        </span>
-                        <a href="/post/<%= rel.slug %>" class="read-more" style="font-size: 0.85rem;">Xem ngay</a>
-                    </div>
-                </div>
-            </article>
-            <% }); %>
-        </div>
-    </section>
-    <% } %>
-</div>
-
-<script>
-    // Logic cho phần bình luận
-    function toggleCommentOptions(commentId) {
-        const dropdown = document.getElementById(`comment-options-${commentId}`);
-        if (dropdown) {
-            // Đóng tất cả các dropdown khác trước khi mở
-            document.querySelectorAll('.comment-dropdown').forEach(d => {
-                if (d.id !== `comment-options-${commentId}`) {
+        // Đóng dropdown khi click ra ngoài
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.comment-options-wrapper')) {
+                document.querySelectorAll('.comment-dropdown').forEach(d => {
                     d.style.display = 'none';
-                }
-            });
-            
-            if (dropdown.style.display === 'none' || dropdown.style.display === '') {
-                dropdown.style.display = 'block';
-            } else {
-                dropdown.style.display = 'none';
+                });
             }
-        }
-    }
-
-    // Đóng dropdown khi click ra ngoài
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.comment-options-wrapper')) {
-            document.querySelectorAll('.comment-dropdown').forEach(d => {
-                d.style.display = 'none';
-            });
-        }
-    });
-
-    function toggleReplyForm(commentId) {
-        const formContainer = document.getElementById(`reply-form-${commentId}`);
-        if (formContainer) {
-            if (formContainer.style.display === 'none' || formContainer.style.display === '') {
-                formContainer.style.display = 'block';
-                formContainer.querySelector('textarea').focus();
-            } else {
-                formContainer.style.display = 'none';
-            }
-        } else {
-            // Nếu chưa đăng nhập, mở modal đăng nhập
-            if (typeof openAuthModal === 'function') {
-                openAuthModal();
-            }
-        }
-    }
-
-    function toggleEditForm(commentId) {
-        const textElement = document.getElementById(`comment-text-${commentId}`);
-        const formElement = document.getElementById(`edit-form-${commentId}`);
-        
-        if (textElement && formElement) {
-            if (formElement.style.display === 'none' || formElement.style.display === '') {
-                textElement.style.display = 'none';
-                formElement.style.display = 'block';
-                formElement.querySelector('textarea').focus();
-            } else {
-                textElement.style.display = 'block';
-                formElement.style.display = 'none';
-            }
-        }
-    }
-
-    // Hiệu ứng nhận diện bình luận từ thông báo
-    function handleNotificationHighlight() {
-        const hash = window.location.hash;
-        if (hash && hash.startsWith('#comment-')) {
-            const targetId = hash.substring(1);
-            const element = document.getElementById(targetId);
-            if (element) {
-                // Thêm class highlight
-                element.classList.add('highlight-notif');
-                
-                // Cuộn tới vị trí chính giữa để dễ nhìn nhất
-                setTimeout(() => {
-                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 100);
-
-                // Xóa hash trên URL để khi F5 không bị highlight lại
-                setTimeout(() => {
-                    history.replaceState(null, null, window.location.pathname + window.location.search);
-                }, 3500);
-
-                // Xóa class sau khi animation kết thúc
-                setTimeout(() => {
-                    element.classList.remove('highlight-notif');
-                }, 4000);
-            }
-        }
-    }
-
-    function initToc() {
-        const articleContent = document.getElementById('article-content');
-        const tocList = document.getElementById('toc-list');
-        if (!articleContent || !tocList) return;
-
-        const headers = articleContent.querySelectorAll('h2');
-        tocList.innerHTML = '';
-
-        if (headers.length === 0) {
-            const sidebar = document.querySelector('.post-sidebar');
-            const layout = document.querySelector('.post-layout-container');
-            if (sidebar) sidebar.style.display = 'none';
-            if (layout) layout.style.gridTemplateColumns = '1fr';
-            return;
-        }
-
-        const headerElements = Array.from(headers);
-        
-        headerElements.forEach((header, index) => {
-            const id = 'section-' + (index + 1);
-            header.setAttribute('id', id);
-
-            const li = document.createElement('li');
-            const a = document.createElement('a');
-            a.setAttribute('href', '#' + id);
-            a.textContent = header.textContent;
-            
-            a.addEventListener('click', (e) => {
-                e.preventDefault();
-                const targetId = a.getAttribute('href').substring(1);
-                const targetElement = document.getElementById(targetId);
-                
-                if (targetElement) {
-                    const headerOffset = 100;
-                    const elementPosition = targetElement.getBoundingClientRect().top;
-                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-                    window.scrollTo({
-                        top: offsetPosition,
-                        behavior: 'smooth'
-                    });
-                }
-            });
-
-            li.appendChild(a);
-            tocList.appendChild(li);
         });
 
-        // Bulletproof Scrollspy Logic
-        function updateActiveSection() {
-            // Khoảng bù cho Header và để kích hoạt sớm hơn một chút khi cuộn
-            const scrollPosition = window.scrollY + 150; 
-            let currentId = headerElements.length > 0 ? headerElements[0].getAttribute('id') : '';
-
-            headerElements.forEach(header => {
-                // Tính toán vị trí tuyệt đối của thẻ H2 so với đầu trang web
-                const headerAbsoluteTop = header.getBoundingClientRect().top + window.scrollY;
-                if (scrollPosition >= headerAbsoluteTop) {
-                    currentId = header.getAttribute('id');
+        function toggleReplyForm(commentId) {
+            const formContainer = document.getElementById(`reply-form-${commentId}`);
+            if (formContainer) {
+                if (formContainer.style.display === 'none' || formContainer.style.display === '') {
+                    formContainer.style.display = 'block';
+                    formContainer.querySelector('textarea').focus();
+                } else {
+                    formContainer.style.display = 'none';
                 }
-            });
-
-            // Cập nhật class active cho danh sách mục lục
-            document.querySelectorAll('.toc-list a').forEach(link => {
-                link.classList.remove('active');
-                if (link.getAttribute('href') === '#' + currentId) {
-                    link.classList.add('active');
+            } else {
+                // Nếu chưa đăng nhập, mở modal đăng nhập
+                if (typeof openAuthModal === 'function') {
+                    openAuthModal();
                 }
-            });
+            }
         }
 
-        // Đảm bảo chỉ gán 1 lần
-        window.removeEventListener('scroll', updateActiveSection);
-        window.addEventListener('scroll', updateActiveSection);
-        
-        // Chạy ngay lần đầu tiên để xác định vị trí hiện tại
-        updateActiveSection();
-    }
+        function toggleEditForm(commentId) {
+            const textElement = document.getElementById(`comment-text-${commentId}`);
+            const formElement = document.getElementById(`edit-form-${commentId}`);
 
-    document.addEventListener('DOMContentLoaded', () => {
-        initToc();
-        handleNotificationHighlight();
-    });
-    document.addEventListener('htmx:afterSettle', () => {
-        initToc();
-        handleNotificationHighlight();
-    });
-</script>
-
-<script>
-    // Hệ thống theo dõi Click Affiliate chuyên sâu (Bulletproof)
-    document.addEventListener('DOMContentLoaded', () => {
-        const articleId = '<%= article.id %>';
-        
-        const trackClick = (e) => {
-            const link = e.target.closest('a');
-            if (!link) return;
-
-            const href = link.getAttribute('href') || '';
-            const isAffiliateLink = 
-                link.classList.contains('affiliate-btn') || 
-                link.classList.contains('btn-compare-aff') ||
-                href.includes('shope.ee') || 
-                href.includes('tiki.vn') || 
-                href.includes('lazada.vn') ||
-                href.includes('shopee.vn');
-
-            if (isAffiliateLink) {
-                // Sử dụng Beacon API để đảm bảo request được gửi thành công 100% khi chuyển trang
-                const trackingUrl = `/api/track-click/${articleId}`;
-                
-                if (navigator.sendBeacon) {
-                    navigator.sendBeacon(trackingUrl);
+            if (textElement && formElement) {
+                if (formElement.style.display === 'none' || formElement.style.display === '') {
+                    textElement.style.display = 'none';
+                    formElement.style.display = 'block';
+                    formElement.querySelector('textarea').focus();
                 } else {
-                    // Fallback cho trình duyệt cũ
-                    fetch(trackingUrl, { method: 'POST', keepalive: true });
+                    textElement.style.display = 'block';
+                    formElement.style.display = 'none';
                 }
-                console.log('Affiliate tracking activated for ID:', articleId);
             }
-        };
+        }
 
-        // Lắng nghe trên toàn bộ trang để không bỏ sót bất kỳ link nào
-        document.body.addEventListener('click', trackClick);
-    });
-</script>
+        // Hiệu ứng nhận diện bình luận từ thông báo
+        function handleNotificationHighlight() {
+            const hash = window.location.hash;
+            if (hash && hash.startsWith('#comment-')) {
+                const targetId = hash.substring(1);
+                const element = document.getElementById(targetId);
+                if (element) {
+                    // Thêm class highlight
+                    element.classList.add('highlight-notif');
 
-<%- include('partials/footer') %>
+                    // Cuộn tới vị trí chính giữa để dễ nhìn nhất
+                    setTimeout(() => {
+                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 100);
+
+                    // Xóa hash trên URL để khi F5 không bị highlight lại
+                    setTimeout(() => {
+                        history.replaceState(null, null, window.location.pathname + window.location.search);
+                    }, 3500);
+
+                    // Xóa class sau khi animation kết thúc
+                    setTimeout(() => {
+                        element.classList.remove('highlight-notif');
+                    }, 4000);
+                }
+            }
+        }
+
+        function initToc() {
+            const articleContent = document.getElementById('article-content');
+            const tocList = document.getElementById('toc-list');
+            if (!articleContent || !tocList) return;
+
+            const headers = articleContent.querySelectorAll('h2');
+            tocList.innerHTML = '';
+
+            if (headers.length === 0) {
+                const sidebar = document.querySelector('.post-sidebar');
+                const layout = document.querySelector('.post-layout-container');
+                if (sidebar) sidebar.style.display = 'none';
+                if (layout) layout.style.gridTemplateColumns = '1fr';
+                return;
+            }
+
+            const headerElements = Array.from(headers);
+
+            headerElements.forEach((header, index) => {
+                const id = 'section-' + (index + 1);
+                header.setAttribute('id', id);
+
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.setAttribute('href', '#' + id);
+                a.textContent = header.textContent;
+
+                a.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = a.getAttribute('href').substring(1);
+                    const targetElement = document.getElementById(targetId);
+
+                    if (targetElement) {
+                        const headerOffset = 100;
+                        const elementPosition = targetElement.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+
+                li.appendChild(a);
+                tocList.appendChild(li);
+            });
+
+            // Bulletproof Scrollspy Logic
+            function updateActiveSection() {
+                // Khoảng bù cho Header và để kích hoạt sớm hơn một chút khi cuộn
+                const scrollPosition = window.scrollY + 150;
+                let currentId = headerElements.length > 0 ? headerElements[0].getAttribute('id') : '';
+
+                headerElements.forEach(header => {
+                    // Tính toán vị trí tuyệt đối của thẻ H2 so với đầu trang web
+                    const headerAbsoluteTop = header.getBoundingClientRect().top + window.scrollY;
+                    if (scrollPosition >= headerAbsoluteTop) {
+                        currentId = header.getAttribute('id');
+                    }
+                });
+
+                // Cập nhật class active cho danh sách mục lục
+                document.querySelectorAll('.toc-list a').forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === '#' + currentId) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+
+            // Đảm bảo chỉ gán 1 lần
+            window.removeEventListener('scroll', updateActiveSection);
+            window.addEventListener('scroll', updateActiveSection);
+
+            // Chạy ngay lần đầu tiên để xác định vị trí hiện tại
+            updateActiveSection();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initToc();
+            handleNotificationHighlight();
+        });
+        document.addEventListener('htmx:afterSettle', () => {
+            initToc();
+            handleNotificationHighlight();
+        });
+    </script>
+
+    <script>
+        // Hệ thống theo dõi Click Affiliate chuyên sâu (Bulletproof)
+        document.addEventListener('DOMContentLoaded', () => {
+            const articleId = '<%= article.id %>';
+
+            const trackClick = (e) => {
+                const link = e.target.closest('a');
+                if (!link) return;
+
+                const href = link.getAttribute('href') || '';
+                const isAffiliateLink =
+                    link.classList.contains('affiliate-btn') ||
+                    link.classList.contains('btn-compare-aff') ||
+                    href.includes('shope.ee') ||
+                    href.includes('tiki.vn') ||
+                    href.includes('lazada.vn') ||
+                    href.includes('shopee.vn');
+
+                if (isAffiliateLink) {
+                    // Sử dụng Beacon API để đảm bảo request được gửi thành công 100% khi chuyển trang
+                    const trackingUrl = `/api/track-click/${articleId}`;
+
+                    if (navigator.sendBeacon) {
+                        navigator.sendBeacon(trackingUrl);
+                    } else {
+                        // Fallback cho trình duyệt cũ
+                        fetch(trackingUrl, { method: 'POST', keepalive: true });
+                    }
+                    console.log('Affiliate tracking activated for ID:', articleId);
+                }
+            };
+
+            // Lắng nghe trên toàn bộ trang để không bỏ sót bất kỳ link nào
+            document.body.addEventListener('click', trackClick);
+        });
+    </script>
+
+    <%- include('partials/footer') %>

@@ -1,0 +1,204 @@
+<div id="ai-chatbot-wrapper">
+    <!-- Nút Mở/Đóng Chatbot (Float Bubble) -->
+    <button id="chatbot-toggle-btn" class="chatbot-bubble glass">
+        <i data-lucide="message-circle-heart" size="28"></i>
+    </button>
+
+    <!-- Khung Chatbot -->
+    <div id="chatbot-container" class="chatbot-window glass-panel">
+        <div class="chatbot-header">
+            <div class="chatbot-title">
+                <i data-lucide="sparkles"></i>
+                <div>
+                    <h3>PurePick AI</h3>
+                    <span>Chuyên gia tư vấn</span>
+                </div>
+            </div>
+            <div class="chatbot-actions">
+                <button id="chatbot-reset-btn" title="Làm mới cuộc trò chuyện"><i data-lucide="rotate-ccw" size="18"></i></button>
+                <button id="chatbot-close-btn" title="Đóng"><i data-lucide="x" size="20"></i></button>
+            </div>
+        </div>
+
+        <div class="chatbot-body" id="chatbot-messages">
+            <!-- Lời chào mặc định -->
+            <div class="chat-msg ai-msg">
+                <div class="msg-avatar"><i data-lucide="message-circle-heart" size="16"></i></div>
+                <div class="msg-content">
+                    <p>Chào bạn! Mình là chuyên gia tư vấn ảo của PurePick. Bạn đang tìm kiếm sản phẩm chăm sóc da hay trang điểm nào? Hãy chia sẻ tình trạng da và nhu cầu của bạn nhé!</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="chatbot-footer">
+            <form id="chatbot-form">
+                <input type="text" id="chatbot-input" placeholder="Nhập câu hỏi của bạn..." autocomplete="off" required>
+                <button type="submit" id="chatbot-send-btn">
+                    <i data-lucide="send" size="18"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function initChatbot() {
+        const chatToggleBtn = document.getElementById('chatbot-toggle-btn');
+        const chatCloseBtn = document.getElementById('chatbot-close-btn');
+        const chatContainer = document.getElementById('chatbot-container');
+        const chatMessages = document.getElementById('chatbot-messages');
+        const chatForm = document.getElementById('chatbot-form');
+        const chatInput = document.getElementById('chatbot-input');
+        const chatResetBtn = document.getElementById('chatbot-reset-btn');
+
+        if (!chatToggleBtn || !chatContainer || !chatForm) return;
+
+        // Xóa các event listener cũ nếu có bằng cách clone (để tránh lặp sự kiện khi htmx load lại)
+        const newChatForm = chatForm.cloneNode(true);
+        chatForm.parentNode.replaceChild(newChatForm, chatForm);
+        const newChatInput = document.getElementById('chatbot-input');
+
+        function saveChatHistory() {
+            sessionStorage.setItem('purepick_ai_history', chatMessages.innerHTML);
+        }
+
+        // Generate Session ID và khôi phục lịch sử hội thoại
+        let chatSessionId = sessionStorage.getItem('purepick_ai_session');
+        if (!chatSessionId) {
+            chatSessionId = 'session_' + Math.random().toString(36).substr(2, 9);
+            sessionStorage.setItem('purepick_ai_session', chatSessionId);
+        } else {
+            let savedHistory = sessionStorage.getItem('purepick_ai_history');
+            if (savedHistory) {
+                chatMessages.innerHTML = savedHistory;
+                // Xóa mọi typing indicator bị kẹt (nếu chuyển trang khi đang gõ)
+                const stuckTyping = chatMessages.querySelectorAll('.typing');
+                stuckTyping.forEach(el => {
+                    const msg = el.closest('.chat-msg');
+                    if (msg) msg.remove();
+                });
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        }
+
+        // Đóng mở chatbot
+        chatToggleBtn.onclick = () => {
+            chatContainer.classList.add('active');
+            chatToggleBtn.style.transform = 'scale(0)';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            newChatInput.focus();
+        };
+
+        chatCloseBtn.onclick = () => {
+            chatContainer.classList.remove('active');
+            chatToggleBtn.style.transform = 'scale(1)';
+        };
+
+        // Đóng chatbot khi click ra ngoài
+        if (!window.chatbotClickOutsideAttached) {
+            document.addEventListener('click', (e) => {
+                const currentContainer = document.getElementById('chatbot-container');
+                const currentToggleBtn = document.getElementById('chatbot-toggle-btn');
+                
+                // Sử dụng composedPath để kiểm tra kể cả khi phần tử bị script (như lucide) xóa khỏi DOM
+                const path = e.composedPath();
+                
+                // Nếu chatbot đang mở, và click không nằm trong khung chat, cũng không phải nút toggle
+                if (currentContainer && currentContainer.classList.contains('active')) {
+                    if (!path.includes(currentContainer) && (!currentToggleBtn || !path.includes(currentToggleBtn))) {
+                        currentContainer.classList.remove('active');
+                        if (currentToggleBtn) currentToggleBtn.style.transform = 'scale(1)';
+                    }
+                }
+            });
+            window.chatbotClickOutsideAttached = true;
+        }
+
+        chatResetBtn.onclick = () => {
+            chatSessionId = 'session_' + Math.random().toString(36).substr(2, 9);
+            sessionStorage.setItem('purepick_ai_session', chatSessionId);
+            chatMessages.innerHTML = `
+                <div class="chat-msg ai-msg">
+                    <div class="msg-avatar"><i data-lucide="message-circle-heart" size="16"></i></div>
+                    <div class="msg-content">
+                        <p>Cuộc trò chuyện đã được làm mới! Mình có thể giúp gì cho bạn?</p>
+                    </div>
+                </div>
+            `;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            saveChatHistory();
+        };
+
+        function appendMessage(role, content) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `chat-msg ${role}-msg`;
+            
+            let avatarHtml = '';
+            if (role === 'ai') {
+                avatarHtml = `<div class="msg-avatar"><i data-lucide="message-circle-heart" size="16"></i></div>`;
+            }
+
+            msgDiv.innerHTML = `
+                ${avatarHtml}
+                <div class="msg-content">
+                    ${content}
+                </div>
+            `;
+            chatMessages.appendChild(msgDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            saveChatHistory();
+            return msgDiv;
+        }
+
+        newChatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const text = newChatInput.value.trim();
+            if (!text) return;
+
+            // In tin nhắn User
+            appendMessage('user', `<p>${text}</p>`);
+            newChatInput.value = '';
+
+            // Hiện Typing Indicator
+            const typingMsg = appendMessage('ai', `<p class="typing">Đang suy nghĩ<span>.</span><span>.</span><span>.</span></p>`);
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text, sessionId: chatSessionId })
+                });
+
+                const data = await response.json();
+                
+                // Xóa Typing
+                typingMsg.remove();
+
+                if (data.success) {
+                    let formattedReply = data.reply;
+                    
+                    // Chuyển đổi dấu * đầu dòng thành dấu - (nếu AI lỡ dùng)
+                    formattedReply = formattedReply.replace(/^\s*\*\s+/gm, '- ');
+                    
+                    // Đổi markdown in đậm thành thẻ <strong>
+                    formattedReply = formattedReply.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                    
+                    // Đổi tất cả xuống dòng \n thành <br> để văn bản không bị dính chùm
+                    formattedReply = formattedReply.replace(/\n/g, '<br>');
+                    
+                    appendMessage('ai', formattedReply);
+                } else {
+                    appendMessage('ai', `<p class="text-error">Lỗi: ${data.error}</p>`);
+                }
+            } catch (error) {
+                typingMsg.remove();
+                appendMessage('ai', `<p class="text-error">Mất kết nối với chuyên gia AI.</p>`);
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', initChatbot);
+    document.addEventListener('htmx:afterSettle', initChatbot);
+    document.addEventListener('htmx:historyRestore', initChatbot);
+</script>
