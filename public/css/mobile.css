@@ -153,17 +153,50 @@
         font-size: 0.95rem !important;
         white-space: nowrap;
     }
+    
+    /* Thu nhỏ khung chat trên màn hình cỡ trung bình (dưới 900px) */
+    .chatbot-window {
+        width: 360px;
+        height: 520px;
+    }
 }
 
 @media (max-width: 768px) {
+    /* Thu nhỏ một chút trên Tablet */
+    .chatbot-window {
+        width: 350px;
+        height: 500px;
+    }
 }
 
 @media (max-width: 480px) {
     .site-header .navbar { 
         flex-direction: row; 
     }
+    
+    /* Chatbot Mobile Styles */
+    .chatbot-window {
+        width: calc(100vw - 40px);
+        max-width: 340px; /* Khống chế bề ngang tối đa để không bị bè ra trên các đt lớn */
+        height: 60vh; /* Giảm chiều cao xuống để khỏi ngộp màn hình */
+        right: 0;
+        left: auto;
+    }
+    
+    #ai-chatbot-wrapper {
+        bottom: 20px;
+        right: 20px;
+    }
 }
 
+
+/* Tối ưu cho Tablet xoay ngang (ví dụ: iPad Landscape) hoặc màn hình có chiều cao thấp */
+@media (max-width: 1024px) and (orientation: landscape), (max-height: 800px) {
+    .chatbot-window {
+        width: 350px;
+        height: 480px;
+    }
+}
 
 /* Animations for Mobile */
 @keyframes fadeIn {
